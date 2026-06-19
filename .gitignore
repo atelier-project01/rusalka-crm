@@ -9,9 +9,12 @@ next-env.d.ts
 # production
 /build
 
-# env (never commit secrets)
+# env / secrets (never commit)
 .env
 .env*.local
+*secrets*
+*.pem
+*.key
 
 # vercel
 .vercel
