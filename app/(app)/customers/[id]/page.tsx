@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
 import { addNote, setConsent } from "./actions";
 import { createCareItem } from "../../care/actions";
+import { Sparkles, Check } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -140,15 +141,15 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
 
         </div>
         <div className="ck-col ck-right">
-        {/* summary (data, not AI model) */}
+        {/* summary (data snapshot, not an AI model) */}
         <div className="ck-ai ai">
-          <div className="aih"><span className="spark">★</span><h3>Summary</h3></div>
-          <div className="aibody">
-            <div className="seclab">Customer snapshot</div>
-            <div className="summary">
-              <b>{name}</b> is a <b>{customer.lifecycle_stage}</b> with <b>{orders?.length ?? 0}</b> order(s) (LTV €{ltv.toFixed(0)}) and <b>{quizzes?.length ?? 0}</b> consultation(s). Marketing consent: <b>{consent ? (consent.opted_in ? "opted in" : "opted out") : "not captured"}</b>. {(careItems ?? []).filter((c) => c.status !== "resolved").length} open care item(s).
-            </div>
-          </div>
+          <div className="aih" style={{ borderBottom: "1px solid var(--border)" }}><span className="spark"><Sparkles size={16} /></span><h3>Summary</h3></div>
+          <div className="fieldrow"><span className="fk">Lifecycle</span><span className="fv"><span className={`chip ${LIFECYCLE_CHIP[customer.lifecycle_stage] ?? "neutral"}`}><span className="cdot" />{customer.lifecycle_stage}</span></span></div>
+          <div className="fieldrow"><span className="fk">Orders</span><span className="fv">{orders?.length ?? 0}</span></div>
+          <div className="fieldrow"><span className="fk">Lifetime value</span><span className="fv">€{ltv.toFixed(0)}</span></div>
+          <div className="fieldrow"><span className="fk">Consultations</span><span className="fv">{quizzes?.length ?? 0}</span></div>
+          <div className="fieldrow"><span className="fk">Marketing consent</span><span className="fv">{consent ? (consent.opted_in ? "Opted in" : "Opted out") : "Not captured"}</span></div>
+          <div className="fieldrow"><span className="fk">Open care items</span><span className="fv">{(careItems ?? []).filter((c) => c.status !== "resolved").length}</span></div>
         </div>
 
         {/* next best action */}
@@ -157,7 +158,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
           <div className="steps">
             {nba.map((s, i) => (
               <div className={`step${s.done ? " is-done" : ""}`} key={i}>
-                <span className={`sc ${s.done ? "done" : "todo"}`}>{s.done ? "✓" : ""}</span>
+                <span className={`sc ${s.done ? "done" : "todo"}`}>{s.done ? <Check size={13} /> : null}</span>
                 <span className="stx">{s.text}</span><span className="sm">{s.tag}</span>
               </div>
             ))}

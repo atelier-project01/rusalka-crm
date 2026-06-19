@@ -2,17 +2,18 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { stageOf } from "@/lib/fulfillment";
+import { Package, UserPlus, RefreshCw, ClipboardCheck, ShieldAlert } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 type OrderItem = { productName?: string };
 function ago(iso: string) { const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3.6e6); return h < 1 ? "now" : h < 24 ? `${h}h` : `${Math.floor(h / 24)}d`; }
 
 const ICONS = {
-  box: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M3 7h13v10H3z" /><path d="M16 10h3l2 2v5h-5" /></svg>),
-  user: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="8" r="3.2" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>),
-  cycle: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M21 12a9 9 0 1 1-9-9" /><path d="M21 4v5h-5" /></svg>),
-  quiz: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 11l3 3 8-8" /><path d="M21 12a9 9 0 1 1-6.2-8.6" /></svg>),
-  shield: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6Z" /><path d="m9 12 2 2 4-4" /></svg>),
+  box: <Package size={16} />,
+  user: <UserPlus size={16} />,
+  cycle: <RefreshCw size={16} />,
+  quiz: <ClipboardCheck size={16} />,
+  shield: <ShieldAlert size={16} />,
 };
 
 export default async function DashboardPage() {
