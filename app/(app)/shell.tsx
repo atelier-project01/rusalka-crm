@@ -16,6 +16,7 @@ import {
   Bell,
   LogOut,
   Menu,
+  BookOpen,
 } from "lucide-react";
 
 type ModuleDef = {
@@ -32,6 +33,7 @@ const MODULES: ModuleDef[] = [
   { key: "fulfillment", href: "/fulfillment", label: "Fulfillment", section: "Fulfillment", icon: <Truck size={18} /> },
   { key: "barcode", href: "/barcode", label: "Barcode / GTIN", section: "Barcode / GTIN", icon: <ScanBarcode size={18} /> },
   { key: "care", href: "/care", label: "Customer Care", section: "Customer Care", icon: <Headset size={18} /> },
+  { key: "knowledge", href: "/knowledge", label: "Knowledge Base", section: "Knowledge Base", icon: <BookOpen size={18} /> },
 ];
 
 export default function Shell({

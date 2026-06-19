@@ -309,6 +309,19 @@ tr.sel td{background:var(--accent-weak);}
 .notebox .nrow:last-child{border-bottom:0;}
 .notebox .nrow .nm{font-size:var(--fs-xs);color:var(--text-faint);margin-top:2px;}
 
+/* ============ KNOWLEDGE BASE ============ */
+.kb{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gap);align-items:start;max-width:1180px;}
+.kb .full{grid-column:1 / -1;}
+.kb .att{cursor:default;}
+.kb .att:hover{background:transparent;}
+.kbtext{padding:var(--pad);font-size:var(--fs-sm);color:var(--text);line-height:1.65;}
+.kbtext b{color:var(--text-strong);font-weight:600;}
+.kbsub{padding:12px var(--pad) 4px;font-size:var(--fs-xs);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);}
+.kbrole{display:flex;gap:14px;align-items:baseline;padding:10px var(--pad);border-bottom:1px solid var(--border);font-size:var(--fs-sm);}
+.kbrole:last-child{border-bottom:0;}
+.kbrole .rn{font-weight:600;color:var(--text-strong);flex:0 0 116px;}
+.kbrole .rd{color:var(--text-muted);}
+
 /* ============ RESPONSIVE ============ */
 @media (max-width:1240px){
   .ck-col.ck-left{flex-basis:264px;width:264px;}
@@ -318,6 +331,7 @@ tr.sel td{background:var(--accent-weak);}
   .dash,[data-theme="sf"] .dash{grid-template-columns:1fr;grid-template-areas:"kpis" "att" "table";justify-content:stretch;}
   .kpis{grid-template-columns:repeat(2,1fr);}
   .minis{grid-template-columns:repeat(2,1fr);}
+  .kb{grid-template-columns:1fr;}
 }
 @media (max-width:1024px){
   .work,[data-theme="sf"] .work{grid-template-columns:1fr;justify-content:stretch;grid-template-areas:"top" "main" "side";}
