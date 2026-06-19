@@ -139,7 +139,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
               <tbody>
                 {orders.map((o) => (
                   <tr key={o.id}>
-                    <td className="clink">#{o.id.slice(0, 8)}</td>
+                    <td><Link className="clink" href={`/fulfillment/${o.id}`}>#{o.id.slice(0, 8)}</Link></td>
                     <td className="muted">{Array.isArray(o.items) ? (o.items as OrderItem[]).length : 0}</td>
                     <td className="muted">{o.subscription_plan}</td>
                     <td className="right">€{Number(o.total).toFixed(2)}</td>
