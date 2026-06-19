@@ -7,6 +7,14 @@ export const dynamic = "force-dynamic";
 type OrderItem = { productName?: string };
 function ago(iso: string) { const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3.6e6); return h < 1 ? "now" : h < 24 ? `${h}h` : `${Math.floor(h / 24)}d`; }
 
+const ICONS = {
+  box: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M3 7h13v10H3z" /><path d="M16 10h3l2 2v5h-5" /></svg>),
+  user: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="8" r="3.2" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>),
+  cycle: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M21 12a9 9 0 1 1-9-9" /><path d="M21 4v5h-5" /></svg>),
+  quiz: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 11l3 3 8-8" /><path d="M21 12a9 9 0 1 1-6.2-8.6" /></svg>),
+  shield: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6Z" /><path d="m9 12 2 2 4-4" /></svg>),
+};
+
 export default async function DashboardPage() {
   const db = createAdminClient();
   const since30 = new Date(Date.now() - 30 * 864e5).toISOString();
@@ -30,15 +38,15 @@ export default async function DashboardPage() {
   const queue = queueRes.data ?? [];
 
   const kpis = [
-    { label: "Awaiting fulfillment", value: awaiting.count ?? 0, tone: "io-warn", href: "/fulfillment", foot: "Not yet fulfilled" },
-    { label: "New customers (30d)", value: newCust.count ?? 0, tone: "io-info", href: "/customers", foot: "Signed up recently" },
-    { label: "Active subscriptions", value: subs.count ?? 0, tone: "io-ok", href: "/customers", foot: "Subscriber lifecycle" },
-    { label: "Consultations", value: quizzes.count ?? 0, tone: "io-violet", href: "/customers", foot: "Quiz results on file" },
+    { label: "Awaiting fulfillment", value: awaiting.count ?? 0, tone: "io-warn", icon: ICONS.box, href: "/fulfillment", foot: "Not yet fulfilled" },
+    { label: "New customers (30d)", value: newCust.count ?? 0, tone: "io-info", icon: ICONS.user, href: "/customers", foot: "Signed up recently" },
+    { label: "Active subscriptions", value: subs.count ?? 0, tone: "io-ok", icon: ICONS.cycle, href: "/customers", foot: "Subscriber lifecycle" },
+    { label: "Consultations", value: quizzes.count ?? 0, tone: "io-violet", icon: ICONS.quiz, href: "/customers", foot: "Quiz results on file" },
   ];
-  const attention: { tone: string; title: string; meta: string; href: string }[] = [];
-  if ((awaiting.count ?? 0) > 0) attention.push({ tone: "io-warn", title: `${awaiting.count} order(s) awaiting fulfillment`, meta: "In the fulfillment queue", href: "/fulfillment" });
-  if (noConsent > 0) attention.push({ tone: "io-danger", title: `${noConsent} customer(s) without a consent record`, meta: "GDPR — capture marketing consent", href: "/customers" });
-  if ((newCust.count ?? 0) > 0) attention.push({ tone: "io-info", title: `${newCust.count} new customer(s) in 30 days`, meta: "Review and welcome", href: "/customers" });
+  const attention: { tone: string; icon: React.ReactNode; title: string; meta: string; href: string }[] = [];
+  if ((awaiting.count ?? 0) > 0) attention.push({ tone: "io-warn", icon: ICONS.box, title: `${awaiting.count} order(s) awaiting fulfillment`, meta: "In the fulfillment queue", href: "/fulfillment" });
+  if (noConsent > 0) attention.push({ tone: "io-danger", icon: ICONS.shield, title: `${noConsent} customer(s) without a consent record`, meta: "GDPR — capture marketing consent", href: "/customers" });
+  if ((newCust.count ?? 0) > 0) attention.push({ tone: "io-info", icon: ICONS.user, title: `${newCust.count} new customer(s) in 30 days`, meta: "Review and welcome", href: "/customers" });
 
   return (
     <>
@@ -50,7 +58,7 @@ export default async function DashboardPage() {
         <div className="d-kpis"><div className="kpis">
           {kpis.map((k) => (
             <Link key={k.label} href={k.href} className="kpi" style={{ display: "block" }}>
-              <div className="kt"><span className={`hicon ${k.tone}`} /><span className="kl">{k.label}</span></div>
+              <div className="kt"><span className={`hicon ${k.tone}`}>{k.icon}</span><span className="kl">{k.label}</span></div>
               <div className="kv">{k.value}</div><div className="kf">{k.foot}</div>
             </Link>
           ))}
@@ -75,7 +83,7 @@ export default async function DashboardPage() {
         <div className="d-att"><div className="card">
           <div className="card-h"><h2>Needs attention</h2></div>
           <div className="card-b flush">{attention.length ? (<div className="attlist">
-            {attention.map((a, i) => (<Link key={i} href={a.href} className="att"><span className={`ic ${a.tone}`} /><div className="ab"><div className="at">{a.title}</div><div className="am">{a.meta}</div></div></Link>))}
+            {attention.map((a, i) => (<Link key={i} href={a.href} className="att"><span className={`ic ${a.tone}`}>{a.icon}</span><div className="ab"><div className="at">{a.title}</div><div className="am">{a.meta}</div></div></Link>))}
           </div>) : <div className="card-b muted" style={{ fontSize: "var(--fs-sm)" }}>All clear.</div>}</div>
         </div></div>
       </div>

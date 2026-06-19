@@ -181,16 +181,14 @@ table.tbl tbody tr:last-child td{border-bottom:0;}
 .casebar .cr{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .alarm{display:inline-flex;align-items:center;gap:7px;font-size:var(--fs-xs);font-weight:700;color:var(--danger);background:var(--danger-bg);border:1px solid transparent;padding:5px 11px;border-radius:999px;}
 
-.cockpit{display:grid;gap:var(--gap);align-items:start;}
-.ck-profile{grid-area:profile;} .ck-activity{grid-area:activity;} .ck-order{grid-area:order;}
-.ck-convo{grid-area:convo;} .ck-ai{grid-area:ai;} .ck-nba{grid-area:nba;}
-.cockpit > *{align-self:start;}
-
-/* Salesforce: dense three column */
-[data-theme="sf"] .cockpit{
-  grid-template-columns:296px minmax(0,1fr) 322px;
-  grid-template-areas:"profile convo ai" "activity convo nba" "order convo nba";
-}
+/* Three independent columns. Each column stacks its own cards top-aligned,
+   so sparse data never forces cross-column gaps. */
+.cockpit{display:flex;gap:var(--gap);align-items:flex-start;}
+.ck-col{display:flex;flex-direction:column;gap:var(--gap);min-width:0;}
+.ck-col.ck-left{flex:0 0 300px;width:300px;}
+.ck-col.ck-center{flex:1 1 auto;min-width:0;}
+.ck-col.ck-right{flex:0 0 330px;width:330px;}
+.ck-col > *{width:100%;}
 
 .col-card{background:var(--surface);border:var(--card-border);border-radius:var(--radius-card);box-shadow:var(--card-shadow);}
 
@@ -313,7 +311,8 @@ tr.sel td{background:var(--accent-weak);}
 
 /* ============ RESPONSIVE ============ */
 @media (max-width:1240px){
-  [data-theme="sf"] .cockpit{grid-template-columns:280px minmax(0,1fr);grid-template-areas:"profile convo" "activity convo" "order convo" "ai convo" "nba convo";}
+  .ck-col.ck-left{flex-basis:264px;width:264px;}
+  .ck-col.ck-right{flex-basis:296px;width:296px;}
 }
 @media (max-width:1100px){
   .dash,[data-theme="sf"] .dash{grid-template-columns:1fr;grid-template-areas:"kpis" "att" "table";justify-content:stretch;}
@@ -331,7 +330,8 @@ tr.sel td{background:var(--accent-weak);}
   .navitem .count{position:static!important;margin-left:auto!important;width:auto!important;height:auto!important;font-size:10px!important;padding:1px 7px!important;border-radius:10px!important;}
   .scrim.show{display:block;position:fixed;inset:var(--topbar-h) 0 0 0;background:rgba(0,0,0,.35);z-index:25;}
   .hamburger{display:grid;place-items:center;}
-  .cockpit,[data-theme="sf"] .cockpit{grid-template-columns:1fr;justify-content:stretch;grid-template-areas:"profile" "convo" "ai" "nba" "activity" "order";}
+  .cockpit{flex-direction:column;}
+  .ck-col,.ck-col.ck-left,.ck-col.ck-right{width:auto;flex:1 1 auto;}
 }
 @media (max-width:760px){
   .search{max-width:none;} .brand .wm span{display:none;} .usermenu .who{display:none;}

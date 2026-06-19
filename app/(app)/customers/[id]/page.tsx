@@ -75,6 +75,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
       </div>
 
       <div className="cockpit">
+        <div className="ck-col ck-left">
         {/* profile */}
         <div className="ck-profile col-card profile">
           <div className="pav">{initials}</div>
@@ -118,6 +119,8 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
           </>) : <div className="lineitem"><div className="liname muted">No orders</div></div>}
         </div>
 
+        </div>
+        <div className="ck-col ck-center">
         {/* conversation -> internal notes */}
         <div className="ck-convo col-card convo">
           <div className="card-h"><h2>Notes</h2><span className="sub">internal timeline</span><div className="ha"><span className="chip neutral">{notes?.length ?? 0}</span></div></div>
@@ -135,6 +138,8 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
           </div>
         </div>
 
+        </div>
+        <div className="ck-col ck-right">
         {/* summary (data, not AI model) */}
         <div className="ck-ai ai">
           <div className="aih"><span className="spark">★</span><h3>Summary</h3></div>
@@ -162,6 +167,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
               <button className="btn sm" type="submit">Log</button>
             </form>
           </div>
+        </div>
         </div>
       </div>
 
