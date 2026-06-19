@@ -50,7 +50,7 @@ export default function KnowledgePage() {
             Everything runs as one app. Staff sign in, then reach the tools their role allows. The app does not keep its own copy of the information. It reads from the systems the business already uses. Customers never sign in here.
           </div>
           <div className="kbdiagram">
-            <svg viewBox="0 0 900 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Setup overview. Staff sign in to one hub. The hub reads from staff accounts, the online shop, and the operations system.">
+            <svg viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Setup overview. Staff sign in to one hub. The hub reads from rusalka-ops, rusalka-ecommerce, and recip3.">
               <defs>
                 <marker id="kbarrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                   <path d="M0 0L10 5L0 10z" fill="var(--text-faint)" />
@@ -80,24 +80,27 @@ export default function KnowledgePage() {
               <line x1="450" y1="280" x2="450" y2="312" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
               <line x1="735" y1="280" x2="735" y2="312" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
 
-              {/* Sources (named to match the codebase) */}
-              <rect x="35" y="314" width="260" height="142" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
-              <text x="165" y="348" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Staff accounts</text>
-              <text x="165" y="372" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Who can sign in, and</text>
-              <text x="165" y="389" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">what each role can open.</text>
-              <text x="165" y="426" textAnchor="middle" fontFamily="var(--font-body)" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">Sign in and roles</text>
+              {/* Sources (named the way the team refers to them) */}
+              <rect x="35" y="314" width="260" height="150" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="165" y="340" textAnchor="middle" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">rusalka-ops</text>
+              <text x="165" y="364" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Staff accounts</text>
+              <text x="165" y="387" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Who can sign in, and</text>
+              <text x="165" y="404" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">what each role can open.</text>
+              <text x="165" y="436" textAnchor="middle" fontFamily="var(--font-body)" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">Sign in and roles</text>
 
-              <rect x="320" y="314" width="260" height="142" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
-              <text x="450" y="348" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Ecommerce</text>
-              <text x="450" y="372" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Customers, orders,</text>
-              <text x="450" y="389" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">consultations, notes, care.</text>
-              <text x="450" y="426" textAnchor="middle" fontFamily="var(--font-body)" fontSize="9.5" fontWeight="600" fill="var(--accent-2)">Customer 360 · Care · Fulfillment · Dashboard</text>
+              <rect x="320" y="314" width="260" height="150" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="450" y="340" textAnchor="middle" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">rusalka-ecommerce</text>
+              <text x="450" y="364" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Ecommerce</text>
+              <text x="450" y="387" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Customers, orders,</text>
+              <text x="450" y="404" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">consultations, notes, care.</text>
+              <text x="450" y="436" textAnchor="middle" fontFamily="var(--font-body)" fontSize="9.5" fontWeight="600" fill="var(--accent-2)">Customer 360 · Care · Fulfillment · Dashboard</text>
 
-              <rect x="605" y="314" width="260" height="142" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
-              <text x="735" y="348" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Operations</text>
-              <text x="735" y="372" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">The product barcode</text>
-              <text x="735" y="389" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">(GTIN) pool.</text>
-              <text x="735" y="426" textAnchor="middle" fontFamily="var(--font-body)" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">Barcode / GTIN</text>
+              <rect x="605" y="314" width="260" height="150" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="735" y="340" textAnchor="middle" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">recip3</text>
+              <text x="735" y="364" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Operations</text>
+              <text x="735" y="387" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">The product barcode</text>
+              <text x="735" y="404" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">(GTIN) pool.</text>
+              <text x="735" y="436" textAnchor="middle" fontFamily="var(--font-body)" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">Barcode / GTIN</text>
             </svg>
           </div>
         </div>
