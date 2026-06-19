@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { ModuleKey, Role } from "@/lib/roles";
 
 type ModuleDef = {
+  key: ModuleKey;
   href: string;
   label: string;
   section: string;
@@ -14,6 +16,7 @@ type ModuleDef = {
 
 const MODULES: ModuleDef[] = [
   {
+    key: "dashboard",
     href: "/dashboard",
     label: "Overview Dashboard",
     section: "Overview",
@@ -22,6 +25,7 @@ const MODULES: ModuleDef[] = [
     ),
   },
   {
+    key: "customers",
     href: "/customers",
     label: "Customer 360",
     section: "Customer 360",
@@ -30,6 +34,7 @@ const MODULES: ModuleDef[] = [
     ),
   },
   {
+    key: "marketing",
     href: "/marketing",
     label: "Marketing Campaigns",
     section: "Marketing Campaigns",
@@ -38,6 +43,7 @@ const MODULES: ModuleDef[] = [
     ),
   },
   {
+    key: "fulfillment",
     href: "/fulfillment",
     label: "Fulfillment",
     section: "Fulfillment",
@@ -46,6 +52,7 @@ const MODULES: ModuleDef[] = [
     ),
   },
   {
+    key: "barcode",
     href: "/barcode",
     label: "Barcode / GTIN",
     section: "Barcode / GTIN",
@@ -54,6 +61,7 @@ const MODULES: ModuleDef[] = [
     ),
   },
   {
+    key: "care",
     href: "/care",
     label: "Customer Care",
     section: "Customer Care",
@@ -66,15 +74,20 @@ const MODULES: ModuleDef[] = [
 export default function Shell({
   children,
   userEmail,
+  role,
+  allowed,
 }: {
   children: React.ReactNode;
   userEmail: string;
+  role: Role;
+  allowed: ModuleKey[];
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const [navOpen, setNavOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const active = MODULES.find((m) => pathname.startsWith(m.href)) ?? MODULES[0];
+  const visibleModules = MODULES.filter((m) => allowed.includes(m.key));
+  const active = MODULES.find((m) => pathname.startsWith(m.href)) ?? visibleModules[0] ?? MODULES[0];
 
   const initials = userEmail.replace(/@.*/, "").slice(0, 2).toUpperCase() || "··";
 
@@ -118,7 +131,7 @@ export default function Shell({
         <div className={`scrim${navOpen ? " show" : ""}`} onClick={() => setNavOpen(false)} />
         <nav className={`nav${navOpen ? " open" : ""}`}>
           <div className="seclabel">Modules</div>
-          {MODULES.map((m) => {
+          {visibleModules.map((m) => {
             const on = pathname.startsWith(m.href);
             return (
               <Link
@@ -134,7 +147,7 @@ export default function Shell({
             );
           })}
           <div className="navfoot">
-            <b>Staff access</b><br />
+            <b>Role: {role}</b><br />
             Navigation is gated by role. Sensitive actions write to the audit log.
           </div>
         </nav>
