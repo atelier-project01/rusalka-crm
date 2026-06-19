@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
+import { addNote, setConsent } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
     entityId: id,
   });
 
-  const [{ data: orders }, { data: quizzes }] = await Promise.all([
+  const [{ data: orders }, { data: quizzes }, { data: notes }, { data: consentRows }] = await Promise.all([
     db.from("customer_orders")
       .select("id, items, subscription_plan, total, status, created_at")
       .eq("user_id", id)
@@ -46,7 +47,19 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
       .select("id, skin_type, concerns, recommended_serum, recommended_cleanser, recommended_moisturizer, created_at")
       .eq("user_id", id)
       .order("created_at", { ascending: false }),
+    db.from("customer_interactions")
+      .select("id, kind, body, author, created_at")
+      .eq("customer_id", id)
+      .order("created_at", { ascending: false }),
+    db.from("consents")
+      .select("opted_in, source, created_at")
+      .eq("customer_id", id)
+      .eq("channel", "marketing_email")
+      .order("created_at", { ascending: false })
+      .limit(1),
   ]);
+
+  const consent = consentRows?.[0];
 
   const name = customer.full_name || customer.email || customer.id.slice(0, 8);
   const initials = (customer.full_name || customer.email || "?").slice(0, 2).toUpperCase();
@@ -80,6 +93,33 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
           <div className="s"><span className="sl">Orders</span><span className="sv">{orders?.length ?? 0}</span></div>
           <div className="s"><span className="sl">Consultations</span><span className="sv">{quizzes?.length ?? 0}</span></div>
           <div className="s"><span className="sl">Joined</span><span className="sv">{new Date(customer.created_at).toLocaleDateString()}</span></div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: "var(--gap)" }}>
+        <div className="card-h">
+          <h2>Marketing consent</h2>
+          <span className="sub">email</span>
+          <div className="ha">
+            {consent ? (
+              <span className={`chip ${consent.opted_in ? "ok" : "neutral"}`}>
+                <span className="cdot" />{consent.opted_in ? "Opted in" : "Opted out"}
+              </span>
+            ) : (
+              <span className="chip neutral">No record</span>
+            )}
+          </div>
+        </div>
+        <div className="card-b" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <form action={setConsent} style={{ display: "flex", gap: 8 }}>
+            <input type="hidden" name="customerId" value={id} />
+            <input type="hidden" name="channel" value="marketing_email" />
+            <button className="btn sm" type="submit" name="optedIn" value="true">Opt in</button>
+            <button className="btn sm" type="submit" name="optedIn" value="false">Opt out</button>
+          </form>
+          <span className="faint" style={{ fontSize: "var(--fs-xs)" }}>
+            {consent ? `Last updated ${new Date(consent.created_at).toLocaleString()} · ${consent.source ?? ""}` : "GDPR — changes are audited"}
+          </span>
         </div>
       </div>
 
@@ -129,6 +169,34 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
             </table></div>
           ) : (
             <div className="card-b muted" style={{ fontSize: "var(--fs-sm)" }}>No consultations.</div>
+          )}
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: "var(--gap)" }}>
+        <div className="card-h"><h2>Notes &amp; timeline</h2><span className="sub">{notes?.length ?? 0}</span></div>
+        <form action={addNote} style={{ display: "flex", gap: 8, padding: "var(--pad)", borderBottom: "1px solid var(--border)" }}>
+          <input type="hidden" name="customerId" value={id} />
+          <input
+            name="body"
+            required
+            placeholder="Add an internal note…"
+            style={{ flex: 1, height: 35, padding: "0 12px", fontSize: "var(--fs-sm)", fontFamily: "var(--font-body)", color: "var(--text-strong)", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", outline: "none" }}
+          />
+          <button className="btn pri sm" type="submit">Add note</button>
+        </form>
+        <div className="card-b flush">
+          {notes && notes.length > 0 ? (
+            <div className="notebox">
+              {notes.map((n) => (
+                <div className="nrow" key={n.id}>
+                  {n.body}
+                  <div className="nm">{n.author ?? "staff"} · {new Date(n.created_at).toLocaleString()}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="card-b muted" style={{ fontSize: "var(--fs-sm)" }}>No notes yet.</div>
           )}
         </div>
       </div>
