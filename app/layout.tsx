@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Shell from "./shell";
 
 export const metadata: Metadata = {
   title: "Atelier Rusalka · CRM & Operations Hub",
@@ -18,9 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>
-        <Shell>{children}</Shell>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

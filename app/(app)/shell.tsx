@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 type ModuleDef = {
   href: string;
@@ -62,10 +63,28 @@ const MODULES: ModuleDef[] = [
   },
 ];
 
-export default function Shell({ children }: { children: React.ReactNode }) {
+export default function Shell({
+  children,
+  userEmail,
+}: {
+  children: React.ReactNode;
+  userEmail: string;
+}) {
   const pathname = usePathname();
+  const router = useRouter();
   const [navOpen, setNavOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const active = MODULES.find((m) => pathname.startsWith(m.href)) ?? MODULES[0];
+
+  const initials = userEmail.replace(/@.*/, "").slice(0, 2).toUpperCase() || "··";
+
+  async function signOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    await createClient().auth.signOut();
+    router.replace("/login");
+    router.refresh();
+  }
 
   return (
     <div className="app">
@@ -85,11 +104,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         <div className="top-right">
           <button className="iconbtn hide-sm" title="Help"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.3" /><circle cx="12" cy="16.5" r=".6" fill="currentColor" /></svg></button>
           <button className="iconbtn" title="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" /><path d="M10 20a2 2 0 0 0 4 0" /></svg></button>
-          <div className="usermenu" title="Staff account">
-            <div className="avatar">··</div>
-            <div className="who"><b>Staff</b><span>Sign in</span></div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
+          <div className="usermenu" title={userEmail}>
+            <div className="avatar">{initials}</div>
+            <div className="who"><b>{userEmail.replace(/@.*/, "")}</b><span>Staff</span></div>
           </div>
+          <button className="iconbtn" title="Sign out" onClick={signOut} disabled={signingOut} aria-label="Sign out">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></svg>
+          </button>
         </div>
       </header>
 
