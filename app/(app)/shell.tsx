@@ -34,15 +34,6 @@ const MODULES: ModuleDef[] = [
     ),
   },
   {
-    key: "marketing",
-    href: "/marketing",
-    label: "Marketing Campaigns",
-    section: "Marketing Campaigns",
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 11 21 3l-8 18-2-7-8-3Z" /></svg>
-    ),
-  },
-  {
     key: "fulfillment",
     href: "/fulfillment",
     label: "Fulfillment",

@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
 import { addNote, setConsent } from "./actions";
+import { createCareItem } from "../../care/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,8 @@ const LIFECYCLE_CHIP: Record<string, string> = {
   subscriber: "violet",
   churned: "neutral",
 };
+
+const CARE_STATUS_CHIP: Record<string, string> = { new: "info", in_progress: "warn", resolved: "ok" };
 
 type OrderItem = { productName?: string; category?: string; price?: number };
 
@@ -38,7 +41,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
     entityId: id,
   });
 
-  const [{ data: orders }, { data: quizzes }, { data: notes }, { data: consentRows }] = await Promise.all([
+  const [{ data: orders }, { data: quizzes }, { data: notes }, { data: consentRows }, { data: careItems }] = await Promise.all([
     db.from("customer_orders")
       .select("id, items, subscription_plan, total, status, created_at")
       .eq("user_id", id)
@@ -57,6 +60,10 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
       .eq("channel", "marketing_email")
       .order("created_at", { ascending: false })
       .limit(1),
+    db.from("care_items")
+      .select("id, subject, status, assignee, created_at")
+      .eq("customer_id", id)
+      .order("created_at", { ascending: false }),
   ]);
 
   const consent = consentRows?.[0];
@@ -169,6 +176,39 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
             </table></div>
           ) : (
             <div className="card-b muted" style={{ fontSize: "var(--fs-sm)" }}>No consultations.</div>
+          )}
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: "var(--gap)" }}>
+        <div className="card-h"><h2>Care</h2><span className="sub">{careItems?.length ?? 0}</span></div>
+        <form action={createCareItem} style={{ display: "flex", gap: 8, padding: "var(--pad)", borderBottom: "1px solid var(--border)", flexWrap: "wrap" }}>
+          <input type="hidden" name="customerId" value={id} />
+          <input
+            name="subject"
+            required
+            placeholder="Log a care item…"
+            style={{ flex: 1, minWidth: 220, height: 35, padding: "0 12px", fontSize: "var(--fs-sm)", fontFamily: "var(--font-body)", color: "var(--text-strong)", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", outline: "none" }}
+          />
+          <button className="btn pri sm" type="submit">Log care item</button>
+        </form>
+        <div className="card-b flush">
+          {careItems && careItems.length > 0 ? (
+            <div className="twrap"><table className="tbl">
+              <thead><tr><th>Subject</th><th>Status</th><th>Assignee</th><th>Date</th></tr></thead>
+              <tbody>
+                {careItems.map((c) => (
+                  <tr key={c.id}>
+                    <td className="cstrong">{c.subject}</td>
+                    <td><span className={`chip ${CARE_STATUS_CHIP[c.status] ?? "neutral"}`}><span className="cdot" />{c.status}</span></td>
+                    <td className="muted">{c.assignee ?? "Unassigned"}</td>
+                    <td className="muted">{new Date(c.created_at).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table></div>
+          ) : (
+            <div className="card-b muted" style={{ fontSize: "var(--fs-sm)" }}>No care items.</div>
           )}
         </div>
       </div>

@@ -2,26 +2,25 @@
 // user's app_metadata.crm_role (set in the RusalkaOps auth project), so it
 // travels in the session/JWT — no extra query. Default is least-privilege.
 
+// Marketing Campaigns is deferred out of v1 (handled by a separate plan).
 export const MODULE_KEYS = [
   "dashboard",
   "customers",
-  "marketing",
   "fulfillment",
   "barcode",
   "care",
 ] as const;
 export type ModuleKey = (typeof MODULE_KEYS)[number];
 
-export const ROLES = ["admin", "operations", "barcode", "care", "marketing", "viewer"] as const;
+export const ROLES = ["admin", "operations", "barcode", "care", "viewer"] as const;
 export type Role = (typeof ROLES)[number];
 
 // Which modules each role may open. Everyone gets the dashboard.
 export const ROLE_MODULES: Record<Role, ModuleKey[]> = {
-  admin: ["dashboard", "customers", "marketing", "fulfillment", "barcode", "care"],
+  admin: ["dashboard", "customers", "fulfillment", "barcode", "care"],
   operations: ["dashboard", "fulfillment", "customers"],
   barcode: ["dashboard", "barcode"],
   care: ["dashboard", "customers", "care"],
-  marketing: ["dashboard", "marketing", "customers"],
   viewer: ["dashboard", "customers"],
 };
 
