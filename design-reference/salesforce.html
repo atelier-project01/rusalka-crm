@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="sf">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Atelier Rusalka · CRM &amp; Operations Hub</title>
+
+<!-- Optional web fonts. Progressive enhancement only. If offline, the CSS
+     font stacks fall back to system sans and Georgia, so the file stays
+     fully usable on its own. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;450;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================================
+   ATELIER RUSALKA · CRM & OPERATIONS HUB
+   Front-end style. Look and feel only, no back-end logic.
+   Sample data is fictional. No real PII.
+
+   Design direction: Salesforce Lightning — full left rail, dense three
+   column cockpit, table-first dashboard.
+   ===================================================================== */
+
+:root{ --topbar-h:54px; --nav-w:238px; }
+
+/* ============ THEME TOKENS ============ */
+[data-theme="sf"]{
+  --font-head:"Inter",-apple-system,"Segoe UI",sans-serif; --font-body:"Inter",-apple-system,"Segoe UI",sans-serif;
+  --fw-head:700; --tracking:-0.005em;
+  --canvas:#f3f4f6;
+  --topbar:#032d60; --topbar-2:#0b5cab; --topbar-fg:#ffffff;
+  --nav-bg:#ffffff; --nav-fg:#16325c; --nav-muted:#5c7099;
+  --nav-active-bg:#eaf3fc; --nav-active-fg:#0176d3; --nav-bar:#1b96ff; --nav-border:#e5e8ec;
+  --surface:#ffffff; --surface-2:#f6f8fa; --surface-3:#eef2f6; --panel-head:#fbfcfd;
+  --text-strong:#0a1f44; --text:#1c3a66; --text-muted:#5c7099; --text-faint:#92a4c2;
+  --border:#e2e6ec; --border-2:#d3dae3;
+  --accent:#0176d3; --accent-2:#014486; --accent-weak:#eaf3fc; --on-accent:#fff;
+  --ok:#2e844a; --ok-bg:#eef7f1; --warn:#a86403; --warn-bg:#fdf3e3;
+  --danger:#ba0517; --danger-bg:#fdecec; --info:#0176d3; --info-bg:#eaf3fc; --violet:#5867e8; --violet-bg:#eef0fd;
+  --radius:5px; --radius-lg:7px; --radius-card:8px; --chip-r:11px; --btn-r:5px;
+  --shadow:0 1px 1px rgba(8,31,68,.04),0 1px 3px rgba(8,31,68,.06); --shadow-lg:0 4px 14px rgba(8,31,68,.14);
+  --card-border:1px solid var(--border); --card-shadow:var(--shadow);
+  --gap:12px; --pad:14px 16px; --cell:8px 13px; --row-h:36px;
+  --fs:13px; --fs-sm:12px; --fs-xs:11px; --fs-h1:19px; --fs-h2:14.5px; --line:1.45; --content-pad:18px;
+}
+
+/* ============ RESET ============ */
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;font-family:var(--font-body);font-size:var(--fs);line-height:var(--line);color:var(--text);
+  background:var(--canvas);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;transition:background .3s ease,color .3s ease;}
+h1,h2,h3,h4{margin:0;font-family:var(--font-head);color:var(--text-strong);font-weight:var(--fw-head);letter-spacing:var(--tracking);}
+button{font-family:inherit;cursor:pointer;} a{color:inherit;text-decoration:none;}
+::selection{background:var(--accent-weak);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:8px;border:3px solid transparent;background-clip:padding-box;}
+
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ============ TOP BAR ============ */
+.topbar{height:var(--topbar-h);flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:0 16px;position:relative;z-index:40;
+  background:var(--topbar);color:var(--topbar-fg);transition:background .3s ease;}
+[data-theme="sf"] .topbar{background:linear-gradient(180deg,var(--topbar) 0%,var(--topbar-2) 100%);}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand .mark{width:32px;height:32px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-family:var(--font-head);font-weight:700;font-size:15px;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);}
+.brand .wm{display:flex;flex-direction:column;line-height:1.05;}
+.brand .wm b{font-family:var(--font-head);font-weight:var(--fw-head);font-size:15.5px;letter-spacing:var(--tracking);}
+.brand .wm span{font-size:9.5px;opacity:.7;letter-spacing:.08em;text-transform:uppercase;font-family:var(--font-body);}
+.hamburger{display:none;background:transparent;border:0;color:inherit;padding:6px;border-radius:7px;}
+.hamburger:hover{background:rgba(255,255,255,.12);}
+
+.search{flex:1 1 auto;max-width:480px;position:relative;margin-left:8px;}
+.search input{width:100%;height:36px;border-radius:var(--btn-r);border:1px solid transparent;background:rgba(255,255,255,.15);color:var(--topbar-fg);
+  padding:0 12px 0 36px;font-size:var(--fs-sm);font-family:var(--font-body);outline:none;transition:background .2s,box-shadow .2s,border-color .2s;}
+.search input::placeholder{color:rgba(255,255,255,.7);}
+.search input:focus{background:rgba(255,255,255,.24);box-shadow:0 0 0 3px rgba(255,255,255,.18);}
+.search .si{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.85;pointer-events:none;}
+.search .kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;border:1px solid rgba(255,255,255,.38);border-radius:5px;padding:1px 6px;opacity:.85;font-family:var(--font-body);}
+
+.top-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.iconbtn{width:36px;height:36px;border-radius:var(--btn-r);border:0;background:transparent;color:var(--topbar-fg);display:grid;place-items:center;position:relative;transition:background .2s;}
+.iconbtn:hover{background:rgba(255,255,255,.14);}
+.iconbtn .dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:#ff5b5b;border:1.5px solid var(--topbar);}
+.usermenu{display:flex;align-items:center;gap:9px;padding:3px 9px 3px 4px;border-radius:var(--btn-r);transition:background .2s;}
+.usermenu:hover{background:rgba(255,255,255,.14);cursor:pointer;}
+.avatar{flex:0 0 auto;display:grid;place-items:center;font-weight:600;font-family:var(--font-body);background:var(--accent);color:var(--on-accent);}
+[data-theme="sf"] .avatar{background:#1b96ff;}
+.usermenu .avatar{width:28px;height:28px;border-radius:50%;font-size:11px;}
+.usermenu .who{display:flex;flex-direction:column;line-height:1.15;}
+.usermenu .who b{font-size:12px;font-weight:600;font-family:var(--font-body);}
+.usermenu .who span{font-size:10px;opacity:.75;}
+
+/* ============ BODY + NAV ============ */
+.body{flex:1 1 auto;display:flex;min-height:0;}
+.scrim{display:none;}
+.nav{width:var(--nav-w);flex:0 0 var(--nav-w);background:var(--nav-bg);color:var(--nav-fg);border-right:1px solid var(--nav-border);
+  display:flex;flex-direction:column;overflow-y:auto;z-index:30;transition:background .3s ease,width .25s ease;}
+.nav .seclabel{padding:16px 18px 7px;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--nav-muted);font-weight:600;}
+.navitem{display:flex;align-items:center;gap:12px;padding:9px 14px;margin:2px 10px;border-radius:var(--radius-lg);color:var(--nav-fg);
+  font-size:var(--fs-sm);font-weight:500;position:relative;cursor:pointer;transition:background .15s,color .15s;}
+.navitem .ni{width:18px;height:18px;flex:0 0 auto;color:var(--nav-muted);display:grid;place-items:center;transition:color .15s;}
+.navitem .navlabel{white-space:nowrap;}
+.navitem:hover{background:var(--nav-active-bg);}
+.navitem.on{background:var(--nav-active-bg);color:var(--nav-active-fg);font-weight:600;}
+.navitem.on .ni{color:var(--nav-active-fg);}
+[data-theme="sf"] .navitem.on::before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--nav-bar);}
+.navitem .count{margin-left:auto;font-size:10px;font-weight:700;background:var(--surface-3);color:var(--text-muted);border-radius:10px;padding:1px 7px;min-width:20px;text-align:center;font-family:var(--font-body);}
+.navitem.on .count{background:var(--accent);color:var(--on-accent);}
+.nav .navfoot{margin-top:auto;padding:14px 18px;border-top:1px solid var(--nav-border);font-size:10.5px;color:var(--nav-muted);line-height:1.5;}
+.nav .navfoot b{color:var(--text-muted);font-weight:600;font-family:var(--font-body);}
+
+/* ============ MAIN ============ */
+.main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
+.subbar{flex:0 0 auto;background:var(--surface);border-bottom:1px solid var(--border);padding:0 var(--content-pad);display:flex;align-items:center;gap:16px;min-height:46px;}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:var(--fs-sm);color:var(--text-muted);}
+.crumbs .sep{opacity:.5;} .crumbs b{color:var(--text-strong);font-weight:600;font-family:var(--font-body);}
+.envpill{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-xs);font-weight:600;color:var(--text-muted);background:var(--surface-3);border:1px solid var(--border);padding:3px 10px;border-radius:999px;}
+.envpill .cdot{width:6px;height:6px;border-radius:50%;background:var(--ok);}
+.tabs{margin-left:auto;display:flex;gap:2px;}
+.tabs button{border:0;background:transparent;color:var(--text-muted);font-size:var(--fs-sm);font-weight:600;font-family:var(--font-body);padding:13px 14px 11px;border-bottom:2px solid transparent;transition:all .15s;}
+.tabs button:hover{color:var(--text);}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);}
+.content{flex:1 1 auto;overflow-y:auto;padding:var(--content-pad);}
+.screen{display:none;animation:fade .28s ease;}
+.screen.on{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+
+/* ============ SHARED COMPONENTS ============ */
+.pagehead{display:flex;align-items:flex-start;gap:16px;margin-bottom:var(--gap);flex-wrap:wrap;}
+.pagehead h1{font-size:var(--fs-h1);line-height:1.12;}
+.pagehead p{margin:4px 0 0;color:var(--text-muted);font-size:var(--fs-sm);}
+.pagehead .pa{margin-left:auto;display:flex;gap:9px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:7px;height:35px;padding:0 15px;border-radius:var(--btn-r);font-size:var(--fs-sm);font-weight:600;font-family:var(--font-body);border:1px solid var(--border-2);background:var(--surface);color:var(--text);transition:all .15s;white-space:nowrap;}
+.btn:hover{background:var(--surface-2);border-color:var(--text-faint);}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
+.btn.pri:hover{background:var(--accent-2);border-color:var(--accent-2);}
+.btn.ghost{border-color:transparent;background:transparent;}
+.btn.ghost:hover{background:var(--surface-2);}
+.btn.sm{height:29px;padding:0 11px;font-size:var(--fs-xs);}
+.card{background:var(--surface);border:var(--card-border);border-radius:var(--radius-card);box-shadow:var(--card-shadow);}
+.card-h{display:flex;align-items:center;gap:10px;padding:var(--pad);border-bottom:1px solid var(--border);}
+.card-h h2{font-size:var(--fs-h2);display:flex;align-items:center;gap:8px;}
+.card-h .sub{font-size:var(--fs-xs);color:var(--text-muted);font-weight:400;}
+.card-h .ha{margin-left:auto;display:flex;gap:7px;align-items:center;}
+.card-b{padding:var(--pad);} .card-b.flush{padding:0;}
+.hicon{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;flex:0 0 auto;}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-xs);font-weight:600;font-family:var(--font-body);padding:2px 9px;border-radius:var(--chip-r);line-height:1.55;white-space:nowrap;}
+.chip .cdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.chip.ok{color:var(--ok);background:var(--ok-bg);} .chip.warn{color:var(--warn);background:var(--warn-bg);}
+.chip.danger{color:var(--danger);background:var(--danger-bg);} .chip.info{color:var(--info);background:var(--info-bg);}
+.chip.violet{color:var(--violet);background:var(--violet-bg);} .chip.neutral{color:var(--text-muted);background:var(--surface-3);}
+.tag{display:inline-flex;align-items:center;font-size:var(--fs-xs);font-weight:500;padding:2px 9px;border-radius:var(--chip-r);background:var(--accent-weak);color:var(--accent-2);}
+.io-ok{background:var(--ok-bg);color:var(--ok);} .io-warn{background:var(--warn-bg);color:var(--warn);}
+.io-danger{background:var(--danger-bg);color:var(--danger);} .io-info{background:var(--info-bg);color:var(--info);}
+.io-violet{background:var(--violet-bg);color:var(--violet);} .io-accent{background:var(--accent-weak);color:var(--accent-2);}
+.muted{color:var(--text-muted);} .faint{color:var(--text-faint);} .right{text-align:right;}
+.twrap{overflow-x:auto;}
+table.tbl{width:100%;border-collapse:collapse;font-size:var(--fs-sm);}
+table.tbl thead th{text-align:left;background:var(--panel-head);color:var(--text-muted);font-weight:600;font-size:var(--fs-xs);letter-spacing:.03em;text-transform:uppercase;padding:var(--cell);border-bottom:1px solid var(--border);white-space:nowrap;}
+table.tbl tbody td{padding:var(--cell);border-bottom:1px solid var(--border);height:var(--row-h);vertical-align:middle;color:var(--text);}
+table.tbl tbody tr{transition:background .12s;} table.tbl tbody tr:hover{background:var(--surface-2);cursor:pointer;}
+table.tbl tbody tr:last-child td{border-bottom:0;}
+.cstrong{color:var(--text-strong);font-weight:600;} .clink{color:var(--accent);font-weight:600;}
+
+/* ============ DASHBOARD ============ */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap);}
+.kpi{background:var(--surface);border:var(--card-border);border-radius:var(--radius-card);box-shadow:var(--card-shadow);padding:var(--pad);position:relative;overflow:hidden;}
+.kpi .kt{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+.kpi .kl{font-size:var(--fs-xs);color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.kpi .kv{font-family:var(--font-head);font-size:clamp(26px,3vw,32px);font-weight:var(--fw-head);color:var(--text-strong);line-height:1;letter-spacing:var(--tracking);}
+.kpi .kf{margin-top:9px;font-size:var(--fs-xs);color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+.trend{font-weight:700;display:inline-flex;align-items:center;gap:2px;} .trend.up{color:var(--ok);}
+
+.dash{display:grid;gap:var(--gap);align-items:start;}
+.d-kpis{grid-area:kpis;} .d-table{grid-area:table;} .d-att{grid-area:att;}
+[data-theme="sf"] .dash{grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);grid-template-areas:"kpis kpis" "table att";}
+
+.attlist{display:flex;flex-direction:column;}
+.att{display:flex;gap:12px;padding:12px var(--content-pad);border-bottom:1px solid var(--border);align-items:flex-start;transition:background .12s;cursor:pointer;}
+.att:hover{background:var(--surface-2);} .att:last-child{border-bottom:0;}
+.att .ic{width:30px;height:30px;border-radius:8px;flex:0 0 auto;display:grid;place-items:center;margin-top:1px;}
+.att .ab{flex:1 1 auto;min-width:0;}
+.att .ab .at{font-weight:600;color:var(--text-strong);font-size:var(--fs-sm);}
+.att .ab .am{font-size:var(--fs-xs);color:var(--text-muted);margin-top:1px;}
+.att .aw{font-size:var(--fs-xs);color:var(--text-faint);white-space:nowrap;flex:0 0 auto;}
+
+/* ============ CUSTOMER 360 (layout differs per theme) ============ */
+.casebar{display:flex;align-items:center;gap:16px;margin-bottom:var(--gap);flex-wrap:wrap;}
+.casebar .ct h1{font-size:var(--fs-h1);line-height:1.1;}
+.casebar .ct .cm{font-size:var(--fs-sm);color:var(--text-muted);display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:3px;}
+.casebar .cr{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.alarm{display:inline-flex;align-items:center;gap:7px;font-size:var(--fs-xs);font-weight:700;color:var(--danger);background:var(--danger-bg);border:1px solid transparent;padding:5px 11px;border-radius:999px;}
+
+.cockpit{display:grid;gap:var(--gap);align-items:start;}
+.ck-profile{grid-area:profile;} .ck-activity{grid-area:activity;} .ck-order{grid-area:order;}
+.ck-convo{grid-area:convo;} .ck-ai{grid-area:ai;} .ck-nba{grid-area:nba;}
+.cockpit > *{align-self:start;}
+
+/* Salesforce: dense three column */
+[data-theme="sf"] .cockpit{
+  grid-template-columns:296px minmax(0,1fr) 322px;
+  grid-template-areas:"profile convo ai" "activity convo nba" "order convo nba";
+}
+
+.col-card{background:var(--surface);border:var(--card-border);border-radius:var(--radius-card);box-shadow:var(--card-shadow);}
+
+/* profile */
+.profile{padding:var(--pad);display:flex;flex-direction:column;align-items:center;text-align:center;}
+.profile .pav{width:84px;height:84px;border-radius:50%;margin:6px 0 12px;display:grid;place-items:center;font-family:var(--font-head);font-size:30px;font-weight:600;background:var(--accent-weak);color:var(--accent-2);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--border-2);flex:0 0 auto;}
+.profile .pmain{min-width:0;}
+.profile .pname{font-family:var(--font-head);font-size:clamp(17px,2.2vw,21px);font-weight:var(--fw-head);color:var(--text-strong);line-height:1.15;}
+.profile .pmail{font-size:var(--fs-sm);color:var(--text-muted);margin-top:3px;word-break:break-all;}
+.profile .pbadges{display:flex;flex-direction:column;gap:7px;align-items:center;margin:13px 0;}
+.profile .stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);margin-top:4px;padding-top:13px;gap:4px;width:100%;}
+.profile .stats .s{display:flex;flex-direction:column;gap:2px;}
+.profile .stats .sl{font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);font-weight:600;}
+.profile .stats .sv{font-size:var(--fs);font-weight:700;color:var(--text-strong);font-family:var(--font-body);}
+
+.minihead{display:flex;align-items:center;gap:9px;padding:var(--pad);border-bottom:1px solid var(--border);}
+.minihead h3{font-size:var(--fs-sm);font-weight:600;font-family:var(--font-head);letter-spacing:var(--tracking);}
+.minihead .ha{margin-left:auto;}
+.acts{display:flex;flex-direction:column;}
+.actrow{display:flex;gap:11px;padding:11px var(--pad);border-bottom:1px solid var(--border);align-items:flex-start;}
+.actrow:last-child{border-bottom:0;}
+.actrow .ad{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:0 0 auto;background:var(--accent);}
+.actrow .ad.g{background:var(--text-faint);}
+.actrow .ab2{flex:1 1 auto;} .actrow .aw2{font-size:var(--fs-xs);color:var(--text-faint);}
+.actrow .att2{font-size:var(--fs-sm);color:var(--text-strong);font-weight:600;margin-top:1px;}
+.lineitem{display:flex;align-items:baseline;gap:10px;padding:9px var(--pad);border-bottom:1px solid var(--border);}
+.lineitem:last-child{border-bottom:0;}
+.lineitem .liname{font-size:var(--fs-sm);color:var(--text-strong);font-weight:500;} .lineitem .lisub{font-size:var(--fs-xs);color:var(--text-muted);}
+.lineitem .liprice{margin-left:auto;font-size:var(--fs-sm);font-weight:600;color:var(--text);font-family:var(--font-body);}
+.linetotal{display:flex;justify-content:space-between;align-items:center;padding:11px var(--pad);background:var(--surface-2);font-weight:700;color:var(--text-strong);font-size:var(--fs-sm);border-top:1px solid var(--border);}
+
+/* conversation */
+.convo{display:flex;flex-direction:column;min-height:0;}
+.convo .feed{padding:var(--pad);display:flex;flex-direction:column;gap:14px;}
+.sysline{align-self:center;display:inline-flex;align-items:center;gap:7px;font-size:var(--fs-xs);font-weight:600;color:var(--ok);background:var(--ok-bg);border-radius:999px;padding:5px 13px;}
+.msg{display:flex;flex-direction:column;max-width:80%;gap:4px;}
+.msg .meta{font-size:var(--fs-xs);color:var(--text-muted);font-weight:500;}
+.msg .bubble{padding:10px 14px;font-size:var(--fs-sm);line-height:1.5;border-radius:14px;}
+.msg.them{align-self:flex-start;}
+.msg.them .bubble{background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.msg.me{align-self:flex-end;align-items:flex-end;} .msg.me .meta{text-align:right;}
+.msg.me .bubble{background:var(--accent);color:var(--on-accent);border-bottom-right-radius:4px;}
+.msg .bubble .emo{font-size:15px;}
+.composer{border-top:1px solid var(--border);padding:var(--pad);}
+.composer .cbox{border:1px solid var(--border-2);border-radius:var(--radius-lg);background:var(--surface);transition:border-color .2s,box-shadow .2s;overflow:hidden;}
+.composer .cbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak);}
+.composer textarea{width:100%;border:0;background:transparent;color:var(--text);font-family:var(--font-body);font-size:var(--fs-sm);padding:11px 13px;resize:none;min-height:62px;outline:none;display:block;}
+.composer .ctools{display:flex;align-items:center;gap:4px;padding:7px 9px;border-top:1px solid var(--border);}
+.composer .ctools .tg{width:28px;height:28px;border-radius:6px;border:0;background:transparent;color:var(--text-muted);display:grid;place-items:center;font-weight:700;font-size:13px;transition:background .15s;}
+.composer .ctools .tg:hover{background:var(--surface-3);color:var(--text);}
+.composer .ctools .spacer{flex:1 1 auto;}
+
+/* AI summary + next best action */
+.ai{background:var(--surface);border:var(--card-border);border-radius:var(--radius-card);box-shadow:var(--card-shadow);overflow:hidden;}
+[data-theme="sf"] .ai{border-color:#cfe3f7;box-shadow:0 0 0 1px #e3f0fc,var(--shadow);}
+.ai .aih{display:flex;align-items:flex-start;gap:11px;padding:var(--pad);}
+.ai .aih .spark{width:30px;height:30px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;background:linear-gradient(135deg,var(--violet),var(--accent));color:#fff;}
+.ai .aih h3{font-size:var(--fs-h2);line-height:1.2;}
+.ai .aih .conf{margin-left:auto;text-align:right;flex:0 0 auto;}
+.ai .aih .conf .cl{font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);font-weight:600;}
+.ai .aih .conf .cv{font-size:var(--fs-sm);font-weight:700;color:var(--ok);font-family:var(--font-body);}
+.ai .aibody{padding:0 var(--pad) var(--pad);}
+.ai .seclab{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);font-weight:700;margin:4px 0 8px;}
+.ai .summary{font-size:var(--fs-sm);line-height:1.55;color:var(--text);} .ai .summary b{color:var(--text-strong);font-weight:600;}
+.hl{background:var(--danger-bg);color:var(--danger);font-weight:600;padding:0 4px;border-radius:4px;}
+.ai .friction{display:flex;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.ai .friction .fi{width:26px;height:26px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;background:var(--danger-bg);color:var(--danger);}
+.ai .friction .ft{font-size:var(--fs-sm);} .ai .friction .ft b{display:block;color:var(--text-strong);font-weight:600;margin-bottom:2px;} .ai .friction .ft span{color:var(--text-muted);}
+.nba{background:var(--surface);border:var(--card-border);border-radius:var(--radius-card);box-shadow:var(--card-shadow);}
+.nba .nh{padding:var(--pad);} .nba .nh h3{font-size:var(--fs-h2);display:flex;align-items:center;gap:8px;}
+.nba .nh p{margin:5px 0 0;font-size:var(--fs-sm);color:var(--text-muted);}
+.nba .steps{padding:0 var(--pad) var(--pad);display:flex;flex-direction:column;gap:8px;}
+[data-theme="sf"] .nba .steps{display:flex;}
+.step{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface-2);transition:all .15s;}
+.step:hover{border-color:var(--border-2);}
+.step .sc{width:22px;height:22px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;}
+.step .sc.done{background:var(--ok);color:#fff;} .step .sc.todo{background:transparent;border:2px dashed var(--border-2);}
+.step .stx{flex:1 1 auto;font-size:var(--fs-sm);color:var(--text-strong);font-weight:500;}
+.step.is-done .stx{color:var(--text-muted);text-decoration:line-through;}
+.step .sm{font-size:var(--fs-xs);color:var(--text-faint);}
+
+.note{margin-top:22px;padding:13px 16px;border:1px dashed var(--border-2);border-radius:var(--radius-card);background:var(--surface-2);color:var(--text-muted);font-size:var(--fs-xs);display:flex;gap:11px;align-items:center;}
+.note b{color:var(--text);font-weight:600;}
+
+/* ============ GENERIC WORK SCREENS (list + detail) ============ */
+.work{display:grid;gap:var(--gap);align-items:start;}
+.work>*{align-self:start;min-width:0;}
+.w-top{grid-area:top;} .w-main{grid-area:main;} .w-side{grid-area:side;}
+/* Salesforce: stats strip on top, table left, detail rail right */
+[data-theme="sf"] .work{grid-template-columns:minmax(0,1fr) 344px;grid-template-areas:"top top" "main side";}
+
+.minis{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap);}
+.mini{background:var(--surface);border:var(--card-border);border-radius:var(--radius-card);box-shadow:var(--card-shadow);padding:12px 15px;display:flex;flex-direction:column;gap:7px;}
+.mini .ml{font-size:var(--fs-xs);color:var(--text-muted);font-weight:600;display:flex;align-items:center;gap:7px;}
+.mini .mv{font-family:var(--font-head);font-size:23px;font-weight:var(--fw-head);color:var(--text-strong);line-height:1;letter-spacing:var(--tracking);}
+.mini .mc{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
+
+.fieldrow{display:flex;justify-content:space-between;gap:12px;padding:10px var(--pad);border-bottom:1px solid var(--border);font-size:var(--fs-sm);}
+.fieldrow:last-child{border-bottom:0;}
+.fieldrow .fk{color:var(--text-muted);} .fieldrow .fv{color:var(--text-strong);font-weight:600;text-align:right;}
+.panelactions{padding:var(--pad);display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);}
+.panelactions .btn{justify-content:center;width:100%;}
+
+.barcode{height:56px;border-radius:6px;margin:var(--pad) var(--pad) 6px;background-color:#ffffff;border:1px solid var(--border);
+  background-image:repeating-linear-gradient(90deg,#15171a 0 2px,#fff 2px 4px,#15171a 4px 5px,#fff 5px 9px,#15171a 9px 12px,#fff 12px 14px,#15171a 14px 17px,#fff 17px 20px);}
+.barcode-cap{text-align:center;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:var(--fs-xs);color:var(--text-muted);letter-spacing:.28em;padding-bottom:12px;}
+
+.segrule{display:flex;align-items:center;gap:10px;padding:11px var(--pad);border-bottom:1px solid var(--border);font-size:var(--fs-sm);}
+.segrule:last-child{border-bottom:0;}
+.segrule .sk{color:var(--text-muted);min-width:78px;}
+.bigcount{padding:16px var(--pad);text-align:center;background:var(--surface-2);border-bottom:1px solid var(--border);}
+.bigcount .bn{font-family:var(--font-head);font-size:30px;font-weight:var(--fw-head);color:var(--text-strong);line-height:1;letter-spacing:var(--tracking);}
+.bigcount .bl{font-size:var(--fs-xs);color:var(--text-muted);margin-top:5px;}
+tr.sel td{background:var(--accent-weak);}
+[data-theme="sf"] tr.sel td{box-shadow:inset 3px 0 0 var(--accent);}
+.notebox{padding:var(--pad);border-bottom:1px solid var(--border);}
+.notebox .nrow{font-size:var(--fs-sm);color:var(--text);padding:7px 0;border-bottom:1px dashed var(--border);}
+.notebox .nrow:last-child{border-bottom:0;}
+.notebox .nrow .nm{font-size:var(--fs-xs);color:var(--text-faint);margin-top:2px;}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1240px){
+  [data-theme="sf"] .cockpit{grid-template-columns:280px minmax(0,1fr);grid-template-areas:"profile convo" "activity convo" "order convo" "ai convo" "nba convo";}
+}
+@media (max-width:1100px){
+  .dash,[data-theme="sf"] .dash{grid-template-columns:1fr;grid-template-areas:"kpis" "att" "table";justify-content:stretch;}
+  .kpis{grid-template-columns:repeat(2,1fr);}
+  .minis{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:1024px){
+  .work,[data-theme="sf"] .work{grid-template-columns:1fr;justify-content:stretch;grid-template-areas:"top" "main" "side";}
+}
+@media (max-width:1024px){
+  .nav{position:fixed;top:var(--topbar-h);bottom:0;left:0;width:248px;transform:translateX(-100%);transition:transform .25s ease;box-shadow:var(--shadow-lg);}
+  .nav.open{transform:translateX(0);}
+  /* in the mobile drawer always show labels */
+  .navitem{justify-content:flex-start;} .navitem .navlabel{display:inline!important;}
+  .navitem .count{position:static!important;margin-left:auto!important;width:auto!important;height:auto!important;font-size:10px!important;padding:1px 7px!important;border-radius:10px!important;}
+  .scrim.show{display:block;position:fixed;inset:var(--topbar-h) 0 0 0;background:rgba(0,0,0,.35);z-index:25;}
+  .hamburger{display:grid;place-items:center;}
+  .cockpit,[data-theme="sf"] .cockpit{grid-template-columns:1fr;justify-content:stretch;grid-template-areas:"profile" "convo" "ai" "nba" "activity" "order";}
+}
+@media (max-width:760px){
+  .search{max-width:none;} .brand .wm span{display:none;} .usermenu .who{display:none;}
+  :root{--content-pad:14px;}
+  .kpis{grid-template-columns:1fr;}
+  .pagehead .pa,.casebar .cr{width:100%;}
+}
+@media (max-width:520px){
+  .iconbtn.hide-sm{display:none;} .crumbs .hidesm{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ======================= TOP BAR ======================= -->
+  <header class="topbar">
+    <button class="hamburger" id="ham" aria-label="Toggle navigation"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="brand">
+      <div class="mark">AR</div>
+      <div class="wm"><b>Atelier Rusalka</b><span>CRM &amp; Operations Hub</span></div>
+    </div>
+    <div class="search">
+      <span class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-3.6-3.6"/></svg></span>
+      <input type="text" placeholder="Search customers, orders, GTINs, care items" />
+      <span class="kbd">⌘K</span>
+    </div>
+    <div class="top-right">
+      <button class="iconbtn hide-sm" title="Help"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.3"/><circle cx="12" cy="16.5" r=".6" fill="currentColor"/></svg></button>
+      <button class="iconbtn" title="Notifications"><span class="dot"></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>
+      <div class="usermenu" title="Staff account">
+        <div class="avatar">EM</div>
+        <div class="who"><b>Elena Marchetti</b><span>Customer Care</span></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <div class="body">
+    <div class="scrim" id="scrim"></div>
+
+    <!-- ======================= NAV ======================= -->
+    <nav class="nav" id="nav">
+      <div class="seclabel">Modules</div>
+      <div class="navitem on" data-nav="dashboard" title="Overview Dashboard"><span class="ni"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span><span class="navlabel">Overview Dashboard</span></div>
+      <div class="navitem" data-nav="customer" title="Customer 360"><span class="ni"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="navlabel">Customer 360</span><span class="count">360</span></div>
+      <div class="navitem" data-nav="marketing" title="Marketing Campaigns"><span class="ni"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 21 3l-8 18-2-7-8-3Z"/></svg></span><span class="navlabel">Marketing Campaigns</span></div>
+      <div class="navitem" data-nav="fulfillment" title="Fulfillment"><span class="ni"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></span><span class="navlabel">Fulfillment</span><span class="count">47</span></div>
+      <div class="navitem" data-nav="barcode" title="Barcode / GTIN"><span class="ni"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5v14M7 5v14M10 5v14M13 5v14M16 5v14M19 5v14"/></svg></span><span class="navlabel">Barcode / GTIN</span></div>
+      <div class="navitem" data-nav="care" title="Customer Care"><span class="ni"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></span><span class="navlabel">Customer Care</span><span class="count">9</span></div>
+      <div class="navfoot"><b>Signed in as Customer Care</b><br>Navigation is gated by role. Sensitive actions write to the audit log.<br><span style="opacity:.7">v0.1 design preview</span></div>
+    </nav>
+
+    <!-- ======================= MAIN ======================= -->
+    <main class="main">
+      <div class="subbar">
+        <div class="crumbs"><span class="hidesm">Hub</span><span class="sep hidesm">/</span><span id="cmid" class="hidesm">Overview</span><span class="sep hidesm">/</span><b id="cleaf">Dashboard</b></div>
+        <span style="flex:1 1 auto"></span>
+        <span class="envpill"><span class="cdot"></span>Test environment</span>
+      </div>
+
+      <div class="content">
+
+        <!-- ===================== DASHBOARD ===================== -->
+        <section class="screen on" id="screen-dashboard">
+          <div class="pagehead">
+            <div><h1>Good morning, Elena</h1><p>Tuesday, 17 June. Here is what the team needs to look at today.</p></div>
+            <div class="pa">
+              <button class="btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New care item</button>
+              <button class="btn pri"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 21 3l-8 18-2-7-8-3Z"/></svg>New campaign</button>
+            </div>
+          </div>
+
+          <div class="dash">
+            <div class="d-kpis">
+              <div class="kpis">
+                <div class="kpi"><div class="kt"><span class="hicon io-warn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5"/></svg></span><span class="kl">Awaiting fulfillment</span></div><div class="kv">47</div><div class="kf"><span class="trend up">▲ 8</span> since yesterday. 3 overdue</div></div>
+                <div class="kpi"><div class="kt"><span class="hicon io-info"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="kl">New customers (30d)</span></div><div class="kv">128</div><div class="kf"><span class="trend up">▲ 12%</span> 41 came from the quiz</div></div>
+                <div class="kpi"><div class="kt"><span class="hicon io-ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 4v5h-5"/></svg></span><span class="kl">Active subscriptions</span></div><div class="kv">612</div><div class="kf"><span class="trend up">▲ 5</span> 486 bi-monthly, 126 annual</div></div>
+                <div class="kpi"><div class="kt"><span class="hicon io-violet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 21 3l-8 18-2-7-8-3Z"/></svg></span><span class="kl">Campaign activity</span></div><div class="kv">2,940</div><div class="kf"><span class="trend up">▲ 34%</span> opens on "Summer Hydration"</div></div>
+              </div>
+            </div>
+
+            <div class="d-table">
+              <div class="card">
+                <div class="card-h"><h2>Fulfillment queue</h2><span class="sub">Reserved → Printed → Fulfilled → Shipping</span><div class="ha"><button class="btn sm ghost">View all 47</button></div></div>
+                <div class="card-b flush"><div class="twrap"><table class="tbl">
+                  <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Stage</th><th class="right">Total</th><th>Age</th></tr></thead>
+                  <tbody>
+                    <tr><td class="clink">#AR-10482</td><td class="cstrong">Marina Halvorsen</td><td class="muted">3</td><td><span class="chip warn"><span class="cdot"></span>Reserved</span></td><td class="right">€86.00</td><td class="muted">2h</td></tr>
+                    <tr><td class="clink">#AR-10481</td><td class="cstrong">Tomas Beck</td><td class="muted">1</td><td><span class="chip info"><span class="cdot"></span>Printed</span></td><td class="right">€42.00</td><td class="muted">3h</td></tr>
+                    <tr><td class="clink">#AR-10477</td><td class="cstrong">Priya Nair</td><td class="muted">2</td><td><span class="chip danger"><span class="cdot"></span>Reserved, overdue</span></td><td class="right">€74.50</td><td class="muted">28h</td></tr>
+                    <tr><td class="clink">#AR-10475</td><td class="cstrong">Johan Lindqvist</td><td class="muted">4</td><td><span class="chip ok"><span class="cdot"></span>Fulfilled</span></td><td class="right">€118.00</td><td class="muted">1d</td></tr>
+                    <tr><td class="clink">#AR-10470</td><td class="cstrong">Aïsha Benali</td><td class="muted">2</td><td><span class="chip violet"><span class="cdot"></span>Shipping</span></td><td class="right">€59.00</td><td class="muted">1d</td></tr>
+                    <tr><td class="clink">#AR-10468</td><td class="cstrong">Greta Sørensen</td><td class="muted">1</td><td><span class="chip info"><span class="cdot"></span>Printed</span></td><td class="right">€38.00</td><td class="muted">2d</td></tr>
+                  </tbody>
+                </table></div></div>
+              </div>
+            </div>
+
+            <div class="d-att">
+              <div class="card">
+                <div class="card-h"><h2>Needs attention</h2><div class="ha"><button class="btn sm ghost">Clear</button></div></div>
+                <div class="card-b flush"><div class="attlist">
+                  <div class="att"><span class="ic io-danger"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span><div class="ab"><div class="at">Order #AR-10477 is overdue</div><div class="am">Reserved 28h. Priya Nair. Waiting on a pack sheet</div></div><span class="aw">28h</span></div>
+                  <div class="att"><span class="ic io-warn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></span><div class="ab"><div class="at">3 care items have no owner</div><div class="am">Customer Care queue. Oldest is 6h old</div></div><span class="aw">6h</span></div>
+                  <div class="att"><span class="ic io-info"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5v14M7 5v14M10 5v14M13 5v14M16 5v14M19 5v14"/></svg></span><div class="ab"><div class="at">GTIN pool is low for Serum 30ml</div><div class="am">14 available, below the threshold of 25</div></div><span class="aw">today</span></div>
+                  <div class="att"><span class="ic io-violet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 21 3l-8 18-2-7-8-3Z"/></svg></span><div class="ab"><div class="at">"Autumn Renewal" is ready to send</div><div class="am">Segment: Subscribers. 486 opted in</div></div><span class="aw">draft</span></div>
+                  <div class="att"><span class="ic io-ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></span><div class="ab"><div class="at">GDPR export finished</div><div class="am">T. Beck. Delivered and written to the audit log</div></div><span class="aw">1h</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span><b>Design preview.</b> Salesforce Lightning direction. Sample data only — nothing is wired to live data.</span></div>
+        </section>
+
+        <!-- ===================== CUSTOMER 360 COCKPIT ===================== -->
+        <section class="screen" id="screen-customer">
+          <div class="casebar">
+            <div class="ct"><h1>Customer 360</h1><div class="cm"><span>Active case <b style="color:var(--text-strong)">#8842-A</b></span><span class="chip danger"><span class="cdot"></span>High priority</span><span>Priority Support Team</span></div></div>
+            <div class="cr">
+              <span class="alarm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>High volume</span>
+              <button class="btn sm">Transfer</button>
+              <button class="btn sm">End session</button>
+            </div>
+          </div>
+
+          <div class="cockpit">
+
+            <!-- profile -->
+            <div class="ck-profile col-card profile">
+              <div class="pav">MH</div>
+              <div class="pmain">
+                <div class="pname">Marina Halvorsen</div>
+                <div class="pmail">marina.halvorsen@example.com</div>
+                <div class="pbadges"><span class="chip violet"><span class="cdot"></span>Subscriber</span><span class="tag">VIP, 2 year customer</span></div>
+              </div>
+              <div class="stats">
+                <div class="s"><span class="sl">LTV</span><span class="sv">€1,284</span></div>
+                <div class="s"><span class="sl">Avg order</span><span class="sv">€72</span></div>
+                <div class="s"><span class="sl">Sentiment</span><span class="sv" style="color:var(--danger)">Tense</span></div>
+              </div>
+            </div>
+
+            <!-- recent activity -->
+            <div class="ck-activity col-card">
+              <div class="minihead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h3>Recent activity</h3></div>
+              <div class="acts">
+                <div class="actrow"><span class="ad"></span><div class="ab2"><div class="aw2">Today, 09:41</div><div class="att2">Opened care item #8842-A</div></div></div>
+                <div class="actrow"><span class="ad g"></span><div class="ab2"><div class="aw2">Yesterday</div><div class="att2">Order #AR-10310 delivered</div></div></div>
+                <div class="actrow"><span class="ad g"></span><div class="ab2"><div class="aw2">02 Jun</div><div class="att2">Completed Skin Quiz v3</div></div></div>
+              </div>
+            </div>
+
+            <!-- order -->
+            <div class="ck-order col-card">
+              <div class="minihead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5"/></svg><h3>Order #AR-10310</h3><span class="ha"><span class="chip ok">Delivered</span></span></div>
+              <div class="lineitem"><div><div class="liname">Renewal Serum 30ml</div><div class="lisub">Fragrance free</div></div><span class="liprice">€38.00</span></div>
+              <div class="lineitem"><div><div class="liname">Barrier Repair Cream</div><div class="lisub">Shipped short</div></div><span class="liprice">€24.00</span></div>
+              <div class="lineitem"><div><div class="liname">Gentle Cleanser 150ml</div></div><span class="liprice">€18.00</span></div>
+              <div class="lineitem"><div><div class="liname">Travel pouch</div><div class="lisub">Loyalty gift</div></div><span class="liprice">€0.00</span></div>
+              <div class="linetotal"><span>Order total</span><span>€80.00</span></div>
+            </div>
+
+            <!-- conversation -->
+            <div class="ck-convo col-card convo">
+              <div class="card-h"><span class="hicon io-info"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></span><h2>Conversation</h2><span class="sub">Live chat</span><div class="ha"><span class="chip neutral">Channel: Web</span></div></div>
+              <div class="feed">
+                <div class="sysline"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Loyalty credit added, 500 points</div>
+                <div class="msg them"><div class="meta">Marina, customer · 09:48</div><div class="bubble">My order arrived but the Barrier Repair Cream was missing. The new serum also left my skin a little red. I have had a few problems lately. <span class="emo">😕</span></div></div>
+                <div class="msg me"><div class="meta">Elena, Customer Care · 09:49</div><div class="bubble">I am sorry about that, Marina. I have refunded the missing cream and a replacement ships today. For the redness, pause the serum for 48 hours and patch test on your inner arm first.</div></div>
+                <div class="msg them"><div class="meta">Marina, customer · 09:50</div><div class="bubble">Thank you, that really helps. I appreciate the quick fix.</div></div>
+              </div>
+              <div class="composer">
+                <div class="cbox">
+                  <textarea placeholder="Write a reply to Marina"></textarea>
+                  <div class="ctools">
+                    <button class="tg" title="Bold" style="font-weight:800">B</button>
+                    <button class="tg" title="Italic" style="font-style:italic">I</button>
+                    <button class="tg" title="Link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></button>
+                    <span class="spacer"></span>
+                    <button class="btn sm ghost"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 4v5h-5"/></svg>Regenerate</button>
+                    <button class="btn sm pri">Send reply<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI work summary -->
+            <div class="ck-ai ai">
+              <div class="aih"><span class="spark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></span><h3>Work summary</h3><div class="conf"><div class="cl">Confidence</div><div class="cv">96%</div></div></div>
+              <div class="aibody">
+                <div class="seclab">AI extracted context</div>
+                <div class="summary"><b>Summary:</b> Marina received order #AR-10310 with the Barrier Repair Cream missing and reported mild redness from the Renewal Serum. <span class="hl">Second contact this month.</span> Refund and replacement already handled in this session.</div>
+                <div class="friction"><span class="fi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span><div class="ft"><b>Friction point</b><span>One line item shipped short even though the order and promo code were valid at checkout.</span></div></div>
+              </div>
+            </div>
+
+            <!-- next best action -->
+            <div class="ck-nba nba">
+              <div class="nh"><h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg>Next best action</h3><p>Steps to close case #8842-A and keep the subscription.</p></div>
+              <div class="steps">
+                <div class="step is-done"><span class="sc done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span><span class="stx">Refund missing cream, €24.00</span><span class="sm">Done</span></div>
+                <div class="step is-done"><span class="sc done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span><span class="stx">Ship replacement cream</span><span class="sm">Today</span></div>
+                <div class="step"><span class="sc todo"></span><span class="stx">Send patch-test guidance</span><span class="sm">Suggested</span></div>
+                <div class="step"><span class="sc todo"></span><span class="stx">Add €10 loyalty credit</span><span class="sm">Suggested</span></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span><b>Design preview.</b> Fictional sample record, no real PII. A dense three column cockpit. The work summary is placeholder content, not a live model.</span></div>
+        </section>
+
+        <!-- ===================== MARKETING CAMPAIGNS ===================== -->
+        <section class="screen" id="screen-marketing">
+          <div class="pagehead">
+            <div><h1>Marketing Campaigns</h1><p>Build segments from CRM data and send consent-aware campaigns.</p></div>
+            <div class="pa"><button class="btn">New segment</button><button class="btn pri"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 21 3l-8 18-2-7-8-3Z"/></svg>New campaign</button></div>
+          </div>
+          <div class="work">
+            <div class="w-top"><div class="minis">
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--violet)"></span>Saved segments</span><span class="mv">6</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--ok)"></span>Active campaigns</span><span class="mv">3</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--info)"></span>Opt-in rate</span><span class="mv">78%</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--warn)"></span>Sent (30d)</span><span class="mv">4,210</span></div>
+            </div></div>
+            <div class="w-main"><div class="card">
+              <div class="card-h"><h2>Campaigns</h2><span class="sub">Consent-aware sending</span><div class="ha"><button class="btn sm ghost">Filter</button></div></div>
+              <div class="card-b flush"><div class="twrap"><table class="tbl">
+                <thead><tr><th>Campaign</th><th>Segment</th><th>Status</th><th class="right">Sent</th><th class="right">Opens</th><th>Updated</th></tr></thead>
+                <tbody>
+                  <tr><td class="cstrong">Summer Hydration</td><td class="muted">Subscribers</td><td><span class="chip ok"><span class="cdot"></span>Sent</span></td><td class="right">486</td><td class="right">2,940</td><td class="muted">2d</td></tr>
+                  <tr class="sel"><td class="cstrong">Autumn Renewal</td><td class="muted">Subscribers</td><td><span class="chip warn"><span class="cdot"></span>Draft</span></td><td class="right">0</td><td class="right">0</td><td class="muted">1h</td></tr>
+                  <tr><td class="cstrong">Win-back: lapsed</td><td class="muted">Churned, 90d</td><td><span class="chip info"><span class="cdot"></span>Scheduled</span></td><td class="right">0</td><td class="right">0</td><td class="muted">5h</td></tr>
+                  <tr><td class="cstrong">Sensitive skin tips</td><td class="muted">Tag: Sensitive</td><td><span class="chip ok"><span class="cdot"></span>Sent</span></td><td class="right">212</td><td class="right">1,038</td><td class="muted">9d</td></tr>
+                  <tr><td class="cstrong">New customer welcome</td><td class="muted">Leads, 14d</td><td><span class="chip violet"><span class="cdot"></span>Always on</span></td><td class="right">128</td><td class="right">611</td><td class="muted">today</td></tr>
+                </tbody>
+              </table></div></div>
+            </div></div>
+            <div class="w-side"><div class="col-card">
+              <div class="minihead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18M6 12h12M10 19h4"/></svg><h3>Segment builder</h3></div>
+              <div class="segrule"><span class="sk">Lifecycle</span><span class="chip violet">Subscriber</span></div>
+              <div class="segrule"><span class="sk">Tags</span><span class="tag">Sensitive skin</span></div>
+              <div class="segrule"><span class="sk">Last order</span><span class="muted">within 60 days</span></div>
+              <div class="segrule"><span class="sk">Consent</span><span class="chip ok"><span class="cdot"></span>Opted in only</span></div>
+              <div class="bigcount"><div class="bn">486</div><div class="bl">customers match, all opted in to email</div></div>
+              <div class="panelactions"><button class="btn">Save segment</button><button class="btn pri">Use in campaign</button></div>
+            </div></div>
+          </div>
+          <div class="note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span><b>Design preview.</b> Segments and sends only reach customers who opted in. Fictional data.</span></div>
+        </section>
+
+        <!-- ===================== FULFILLMENT ===================== -->
+        <section class="screen" id="screen-fulfillment">
+          <div class="pagehead">
+            <div><h1>Fulfillment</h1><p>Order queue and pack room. Reserved → Printed → Fulfilled → Shipping.</p></div>
+            <div class="pa"><button class="btn">Export</button><button class="btn pri"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4v-6h16v6h-2M6 14h12v8H6z"/></svg>Print pack sheets</button></div>
+          </div>
+          <div class="work">
+            <div class="w-top"><div class="minis">
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--warn)"></span>Reserved</span><span class="mv">23</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--info)"></span>Printed</span><span class="mv">12</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--ok)"></span>Fulfilled</span><span class="mv">9</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--violet)"></span>Shipping</span><span class="mv">3</span></div>
+            </div></div>
+            <div class="w-main"><div class="card">
+              <div class="card-h"><h2>Order queue</h2><span class="sub">47 open</span><div class="ha"><button class="btn sm ghost">Filter</button></div></div>
+              <div class="card-b flush"><div class="twrap"><table class="tbl">
+                <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Stage</th><th class="right">Total</th><th>Age</th></tr></thead>
+                <tbody>
+                  <tr class="sel"><td class="clink">#AR-10482</td><td class="cstrong">Marina Halvorsen</td><td class="muted">3</td><td><span class="chip warn"><span class="cdot"></span>Reserved</span></td><td class="right">€86.00</td><td class="muted">2h</td></tr>
+                  <tr><td class="clink">#AR-10481</td><td class="cstrong">Tomas Beck</td><td class="muted">1</td><td><span class="chip info"><span class="cdot"></span>Printed</span></td><td class="right">€42.00</td><td class="muted">3h</td></tr>
+                  <tr><td class="clink">#AR-10477</td><td class="cstrong">Priya Nair</td><td class="muted">2</td><td><span class="chip danger"><span class="cdot"></span>Reserved, overdue</span></td><td class="right">€74.50</td><td class="muted">28h</td></tr>
+                  <tr><td class="clink">#AR-10475</td><td class="cstrong">Johan Lindqvist</td><td class="muted">4</td><td><span class="chip ok"><span class="cdot"></span>Fulfilled</span></td><td class="right">€118.00</td><td class="muted">1d</td></tr>
+                  <tr><td class="clink">#AR-10470</td><td class="cstrong">Aïsha Benali</td><td class="muted">2</td><td><span class="chip violet"><span class="cdot"></span>Shipping</span></td><td class="right">€59.00</td><td class="muted">1d</td></tr>
+                  <tr><td class="clink">#AR-10468</td><td class="cstrong">Greta Sørensen</td><td class="muted">1</td><td><span class="chip info"><span class="cdot"></span>Printed</span></td><td class="right">€38.00</td><td class="muted">2d</td></tr>
+                </tbody>
+              </table></div></div>
+            </div></div>
+            <div class="w-side"><div class="col-card">
+              <div class="minihead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5"/></svg><h3>Order #AR-10482</h3><span class="ha"><span class="chip warn"><span class="cdot"></span>Reserved</span></span></div>
+              <div class="lineitem"><div><div class="liname">Renewal Serum 30ml</div><div class="lisub">GTIN 5012345 678900</div></div><span class="liprice">€38.00</span></div>
+              <div class="lineitem"><div><div class="liname">Barrier Repair Cream</div></div><span class="liprice">€24.00</span></div>
+              <div class="lineitem"><div><div class="liname">Gentle Cleanser 150ml</div></div><span class="liprice">€24.00</span></div>
+              <div class="linetotal"><span>Order total</span><span>€86.00</span></div>
+              <div class="fieldrow"><span class="fk">Customer</span><span class="fv">Marina Halvorsen</span></div>
+              <div class="fieldrow"><span class="fk">Ship to</span><span class="fv">Oslo, NO</span></div>
+              <div class="fieldrow"><span class="fk">Carrier</span><span class="fv">Not assigned</span></div>
+              <div class="panelactions"><button class="btn">Print pack sheet</button><button class="btn">Print labels</button><button class="btn pri">Advance to Printed</button></div>
+            </div></div>
+          </div>
+          <div class="note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span><b>Design preview.</b> Embedded Fulfillment Studio. Fictional orders, no real PII.</span></div>
+        </section>
+
+        <!-- ===================== BARCODE / GTIN ===================== -->
+        <section class="screen" id="screen-barcode">
+          <div class="pagehead">
+            <div><h1>Barcode / GTIN</h1><p>Manage the GTIN pool, issuers and assignment. Generate EAN and UPC labels.</p></div>
+            <div class="pa"><button class="btn">Import Excel</button><button class="btn pri"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5v14M7 5v14M10 5v14M13 5v14M16 5v14M19 5v14"/></svg>Generate label</button></div>
+          </div>
+          <div class="work">
+            <div class="w-top"><div class="minis">
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--ok)"></span>Available</span><span class="mv">142</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--warn)"></span>Reserved</span><span class="mv">38</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--info)"></span>Assigned</span><span class="mv">1,204</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--violet)"></span>Issuers</span><span class="mv">2</span></div>
+            </div></div>
+            <div class="w-main"><div class="card">
+              <div class="card-h"><h2>GTIN pool</h2><span class="sub">Search by GTIN or product</span><div class="ha"><button class="btn sm ghost">Filter</button></div></div>
+              <div class="card-b flush"><div class="twrap"><table class="tbl">
+                <thead><tr><th>GTIN</th><th>Product</th><th>Status</th><th>Issuer</th><th>Updated</th></tr></thead>
+                <tbody>
+                  <tr class="sel"><td class="clink">5012345 678900</td><td class="cstrong">Renewal Serum 30ml</td><td><span class="chip info"><span class="cdot"></span>Assigned</span></td><td class="muted">GS1 NO</td><td class="muted">2d</td></tr>
+                  <tr><td class="clink">5012345 678917</td><td class="cstrong">Barrier Repair Cream</td><td><span class="chip info"><span class="cdot"></span>Assigned</span></td><td class="muted">GS1 NO</td><td class="muted">2d</td></tr>
+                  <tr><td class="clink">5012345 678924</td><td class="muted">Unassigned</td><td><span class="chip warn"><span class="cdot"></span>Reserved</span></td><td class="muted">GS1 NO</td><td class="muted">4h</td></tr>
+                  <tr><td class="clink">5012345 678931</td><td class="muted">Unassigned</td><td><span class="chip ok"><span class="cdot"></span>Available</span></td><td class="muted">GS1 NO</td><td class="muted">4h</td></tr>
+                  <tr><td class="clink">0712345 000045</td><td class="cstrong">Gentle Cleanser 150ml</td><td><span class="chip info"><span class="cdot"></span>Assigned</span></td><td class="muted">GS1 US</td><td class="muted">1w</td></tr>
+                </tbody>
+              </table></div></div>
+            </div></div>
+            <div class="w-side"><div class="col-card">
+              <div class="minihead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5v14M7 5v14M10 5v14M13 5v14M16 5v14M19 5v14"/></svg><h3>GTIN detail</h3><span class="ha"><span class="chip info">Assigned</span></span></div>
+              <div class="barcode"></div>
+              <div class="barcode-cap">5012345 678900</div>
+              <div class="fieldrow"><span class="fk">Product</span><span class="fv">Renewal Serum 30ml</span></div>
+              <div class="fieldrow"><span class="fk">Issuer</span><span class="fv">GS1 NO</span></div>
+              <div class="fieldrow"><span class="fk">Brand prefix</span><span class="fv">501234</span></div>
+              <div class="fieldrow"><span class="fk">Format</span><span class="fv">EAN-13</span></div>
+              <div class="panelactions"><button class="btn">Reassign product</button><button class="btn">Generate EAN</button><button class="btn pri">Generate UPC</button></div>
+            </div></div>
+          </div>
+          <div class="note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span><b>Design preview.</b> Embedded Barcode Studio. GTINs shown are fictional examples.</span></div>
+        </section>
+
+        <!-- ===================== CUSTOMER CARE ===================== -->
+        <section class="screen" id="screen-care">
+          <div class="pagehead">
+            <div><h1>Customer Care</h1><p>Log, triage and resolve care interactions against the customer record.</p></div>
+            <div class="pa"><button class="btn">My queue</button><button class="btn pri"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New care item</button></div>
+          </div>
+          <div class="work">
+            <div class="w-top"><div class="minis">
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--info)"></span>Open</span><span class="mv">9</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--warn)"></span>Unassigned</span><span class="mv">3</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--danger)"></span>Overdue</span><span class="mv">1</span></div>
+              <div class="mini"><span class="ml"><span class="mc" style="background:var(--ok)"></span>Resolved today</span><span class="mv">6</span></div>
+            </div></div>
+            <div class="w-main"><div class="card">
+              <div class="card-h"><h2>Care queue</h2><span class="sub">Triage and assign</span><div class="ha"><button class="btn sm ghost">Filter</button></div></div>
+              <div class="card-b flush"><div class="twrap"><table class="tbl">
+                <thead><tr><th>Subject</th><th>Customer</th><th>Linked</th><th>Assignee</th><th>Status</th><th>Age</th></tr></thead>
+                <tbody>
+                  <tr class="sel"><td class="cstrong">Reaction to new serum</td><td class="muted">Marina Halvorsen</td><td class="clink">#AR-10310</td><td class="muted">Elena M.</td><td><span class="chip warn"><span class="cdot"></span>In progress</span></td><td class="muted">2h</td></tr>
+                  <tr><td class="cstrong">Missing item in order</td><td class="muted">Priya Nair</td><td class="clink">#AR-10477</td><td class="muted">Unassigned</td><td><span class="chip danger"><span class="cdot"></span>Overdue</span></td><td class="muted">28h</td></tr>
+                  <tr><td class="cstrong">Change delivery date</td><td class="muted">Tomas Beck</td><td class="muted">Subscription</td><td class="muted">Unassigned</td><td><span class="chip info"><span class="cdot"></span>New</span></td><td class="muted">6h</td></tr>
+                  <tr><td class="cstrong">Quiz result question</td><td class="muted">Johan Lindqvist</td><td class="muted">Consultation</td><td class="muted">Sven A.</td><td><span class="chip warn"><span class="cdot"></span>In progress</span></td><td class="muted">1d</td></tr>
+                  <tr><td class="cstrong">Refund follow-up</td><td class="muted">Aïsha Benali</td><td class="clink">#AR-10470</td><td class="muted">Elena M.</td><td><span class="chip ok"><span class="cdot"></span>Resolved</span></td><td class="muted">1d</td></tr>
+                </tbody>
+              </table></div></div>
+            </div></div>
+            <div class="w-side"><div class="col-card">
+              <div class="minihead"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg><h3>Care item #C-2231</h3><span class="ha"><span class="chip warn">In progress</span></span></div>
+              <div class="fieldrow"><span class="fk">Customer</span><span class="fv clink">Marina Halvorsen</span></div>
+              <div class="fieldrow"><span class="fk">Linked order</span><span class="fv clink">#AR-10310</span></div>
+              <div class="fieldrow"><span class="fk">Assignee</span><span class="fv">Elena M.</span></div>
+              <div class="fieldrow"><span class="fk">Priority</span><span class="fv" style="color:var(--danger)">High</span></div>
+              <div class="notebox">
+                <div class="nrow">Customer reported mild tingling with the new serum. Advised patch-test routine and a 1 week follow-up.<div class="nm">Elena M. · Today 09:14</div></div>
+                <div class="nrow">Refund issued for the missing cream and replacement shipped.<div class="nm">Elena M. · Today 09:49</div></div>
+              </div>
+              <div class="panelactions"><button class="btn">Assign to me</button><button class="btn">Open Customer 360</button><button class="btn pri">Mark resolved</button></div>
+            </div></div>
+          </div>
+          <div class="note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span><b>Design preview.</b> Care items link to the related order or consultation and show on the Customer 360 record. Fictional data.</span></div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* Cosmetic interactions only. No data, no back-end. */
+(function(){
+  var ni=document.querySelectorAll('.navitem');
+  var cmid=document.getElementById('cmid'), cleaf=document.getElementById('cleaf');
+  var cr={
+    dashboard:['Overview','Dashboard'],
+    customer:['Customer 360','Marina Halvorsen'],
+    marketing:['Marketing Campaigns','All campaigns'],
+    fulfillment:['Fulfillment','Order queue'],
+    barcode:['Barcode / GTIN','GTIN pool'],
+    care:['Customer Care','Queue']
+  };
+  function setScreen(name){
+    if(!document.getElementById('screen-'+name)) return;
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+    document.getElementById('screen-'+name).classList.add('on');
+    ni.forEach(function(n){n.classList.toggle('on',n.getAttribute('data-nav')===name);});
+    if(cr[name]){cmid.textContent=cr[name][0];cleaf.textContent=cr[name][1];}
+    document.querySelector('.content').scrollTop=0;
+  }
+  ni.forEach(function(item){item.addEventListener('click',function(){
+    setScreen(item.getAttribute('data-nav'));
+    closeNav();
+  });});
+
+  var nav=document.getElementById('nav'), scrim=document.getElementById('scrim');
+  document.getElementById('ham').addEventListener('click',function(){nav.classList.toggle('open');scrim.classList.toggle('show');});
+  function closeNav(){nav.classList.remove('open');scrim.classList.remove('show');}
+  scrim.addEventListener('click',closeNav);
+})();
+</script>
+</body>
+</html>

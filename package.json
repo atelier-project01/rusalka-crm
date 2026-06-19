@@ -1,0 +1,25 @@
+{
+  "name": "rusalka-crm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Atelier Rusalka — CRM & Operations Hub (internal, staff-only)",
+  "scripts": {
+    "dev": "next dev -p 4178",
+    "build": "next build",
+    "start": "next start -p 4178",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^15",
+    "react": "^19",
+    "react-dom": "^19",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
+  }
+}

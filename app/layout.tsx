@@ -1,0 +1,26 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import Shell from "./shell";
+
+export const metadata: Metadata = {
+  title: "Atelier Rusalka · CRM & Operations Hub",
+  description: "Internal, staff-only CRM & Operations Hub for Atelier Rusalka.",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" data-theme="sf">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
+        <Shell>{children}</Shell>
+      </body>
+    </html>
+  );
+}
