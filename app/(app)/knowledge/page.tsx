@@ -73,27 +73,31 @@ export default function KnowledgePage() {
               <text x="450" y="214" textAnchor="middle" fontFamily="var(--font-body)" fontSize="12.5" fill="var(--text-muted)">All the tools in one place.</text>
 
               {/* distribution bus */}
-              <line x1="450" y1="244" x2="450" y2="286" stroke="var(--text-faint)" strokeWidth="1.5" />
-              <text x="462" y="270" fontFamily="var(--font-body)" fontSize="11" fill="var(--text-muted)">reads information from</text>
-              <line x1="165" y1="286" x2="735" y2="286" stroke="var(--text-faint)" strokeWidth="1.5" />
-              <line x1="165" y1="286" x2="165" y2="318" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
-              <line x1="450" y1="286" x2="450" y2="318" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
-              <line x1="735" y1="286" x2="735" y2="318" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
+              <line x1="450" y1="244" x2="450" y2="280" stroke="var(--text-faint)" strokeWidth="1.5" />
+              <text x="462" y="266" fontFamily="var(--font-body)" fontSize="11" fill="var(--text-muted)">reads information from</text>
+              <line x1="165" y1="280" x2="735" y2="280" stroke="var(--text-faint)" strokeWidth="1.5" />
+              <line x1="165" y1="280" x2="165" y2="312" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
+              <line x1="450" y1="280" x2="450" y2="312" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
+              <line x1="735" y1="280" x2="735" y2="312" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
 
-              {/* Sources */}
-              <rect x="35" y="320" width="260" height="120" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
-              <text x="165" y="360" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Staff accounts</text>
-              <text x="165" y="384" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Decides who can log in.</text>
-              <text x="165" y="402" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Customers are not in it.</text>
+              {/* Sources (named to match the codebase) */}
+              <rect x="35" y="314" width="260" height="142" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="165" y="348" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Staff accounts</text>
+              <text x="165" y="372" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Who can sign in, and</text>
+              <text x="165" y="389" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">what each role can open.</text>
+              <text x="165" y="426" textAnchor="middle" fontFamily="var(--font-body)" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">Sign in and roles</text>
 
-              <rect x="320" y="320" width="260" height="120" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
-              <text x="450" y="360" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Online shop</text>
-              <text x="450" y="384" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Customers, orders,</text>
-              <text x="450" y="402" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">and quiz results.</text>
+              <rect x="320" y="314" width="260" height="142" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="450" y="348" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Ecommerce</text>
+              <text x="450" y="372" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Customers, orders,</text>
+              <text x="450" y="389" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">consultations, notes, care.</text>
+              <text x="450" y="426" textAnchor="middle" fontFamily="var(--font-body)" fontSize="9.5" fontWeight="600" fill="var(--accent-2)">Customer 360 · Care · Fulfillment · Dashboard</text>
 
-              <rect x="605" y="320" width="260" height="120" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
-              <text x="735" y="360" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Operations</text>
-              <text x="735" y="384" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Product barcodes.</text>
+              <rect x="605" y="314" width="260" height="142" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="735" y="348" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Operations</text>
+              <text x="735" y="372" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">The product barcode</text>
+              <text x="735" y="389" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">(GTIN) pool.</text>
+              <text x="735" y="426" textAnchor="middle" fontFamily="var(--font-body)" fontSize="10.5" fontWeight="600" fill="var(--accent-2)">Barcode / GTIN</text>
             </svg>
           </div>
         </div>
@@ -139,7 +143,7 @@ export default function KnowledgePage() {
             <div className="attlist">
               <div className="att">
                 <span className="ic io-warn"><FlaskConical size={16} /></span>
-                <div className="ab"><div className="at">Customers and their history</div><div className="am">The customer records on screen, with their orders, notes, and consultations, are sample entries added to test the layout. Real shop customers appear here once the live shop is connected.</div></div>
+                <div className="ab"><div className="at">Customers and their history</div><div className="am">The customer records on screen, with their orders, notes, and consultations, are sample entries added to test the layout. Real customers appear here once the live Ecommerce data is connected.</div></div>
                 <span className="aw"><span className="chip warn"><span className="cdot" />Sample</span></span>
               </div>
             </div>
@@ -153,15 +157,15 @@ export default function KnowledgePage() {
             <div className="attlist">
               <div className="att">
                 <span className="ic io-accent"><KeyRound size={16} /></span>
-                <div className="ab"><div className="at">Staff accounts</div><div className="am">A private internal list of staff logins. It checks the email and password and sets what each person can open. Customers are not in it.</div></div>
+                <div className="ab"><div className="at">Staff accounts</div><div className="am">A private internal list of staff logins. It checks the email and password and sets what each person can open. Customers are not in it. Powers sign-in and roles.</div></div>
               </div>
               <div className="att">
                 <span className="ic io-accent"><ShoppingCart size={16} /></span>
-                <div className="ab"><div className="at">Customer information</div><div className="am">The online shop's records. Orders, profiles, and consultation results are read from there.</div></div>
+                <div className="ab"><div className="at">Ecommerce</div><div className="am">The store's own records: customers, orders, and consultation results, plus the notes, consent, and care items the team adds. Powers Customer 360, Customer Care, Fulfillment, and the Dashboard.</div></div>
               </div>
               <div className="att">
                 <span className="ic io-accent"><Database size={16} /></span>
-                <div className="ab"><div className="at">Product barcodes</div><div className="am">The operations system that already holds the barcode pool.</div></div>
+                <div className="ab"><div className="at">Operations</div><div className="am">The operations system that holds the product barcode (GTIN) pool. Powers Barcode / GTIN.</div></div>
               </div>
             </div>
             <div className="kbtext muted" style={{ borderTop: "1px solid var(--border)" }}>
