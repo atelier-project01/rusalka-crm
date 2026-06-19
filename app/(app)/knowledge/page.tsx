@@ -12,6 +12,7 @@ import {
   KeyRound,
   ShoppingCart,
   Database,
+  Workflow,
 } from "lucide-react";
 
 const MODULES = [
@@ -39,6 +40,61 @@ export default function KnowledgePage() {
           <div className="card-h"><span className="hicon io-info"><Info size={15} /></span><h2>What this is</h2></div>
           <div className="kbtext">
             This is the staff hub for <b>Atelier Rusalka</b>. It puts orders, customer details, product barcodes, and support notes in one place, so the team does not switch between systems all day. It is for staff only. Customers never see it. Use the menu on the left to move between the tools. You only see the tools your role needs.
+          </div>
+        </div>
+
+        {/* how it is set up (diagram) */}
+        <div className="card full">
+          <div className="card-h"><span className="hicon io-accent"><Workflow size={15} /></span><h2>How it is set up</h2></div>
+          <div className="kbtext">
+            Everything runs as one app. Staff sign in, then reach the tools their role allows. The app does not keep its own copy of the information. It reads from the systems the business already uses. Customers never sign in here.
+          </div>
+          <div className="kbdiagram">
+            <svg viewBox="0 0 900 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Setup overview. Staff sign in to one hub. The hub reads from staff accounts, the online shop, and the operations system.">
+              <defs>
+                <marker id="kbarrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0 0L10 5L0 10z" fill="var(--text-faint)" />
+                </marker>
+              </defs>
+
+              {/* Staff */}
+              <rect x="340" y="22" width="220" height="66" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="450" y="50" textAnchor="middle" fontFamily="var(--font-body)" fontSize="15" fontWeight="600" fill="var(--text-strong)">Staff member</text>
+              <text x="450" y="71" textAnchor="middle" fontFamily="var(--font-body)" fontSize="12" fill="var(--text-muted)">Signs in with email and password</text>
+
+              {/* Staff -> Hub */}
+              <line x1="450" y1="88" x2="450" y2="126" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
+              <text x="462" y="112" fontFamily="var(--font-body)" fontSize="11" fill="var(--text-muted)">signs in</text>
+
+              {/* Hub */}
+              <rect x="250" y="128" width="400" height="116" rx="12" fill="var(--accent-weak)" stroke="var(--accent)" strokeWidth="1.5" />
+              <text x="450" y="170" textAnchor="middle" fontFamily="var(--font-body)" fontSize="17" fontWeight="700" fill="var(--accent-2)">The Hub</text>
+              <text x="450" y="194" textAnchor="middle" fontFamily="var(--font-body)" fontSize="12.5" fill="var(--text-muted)">One login. Staff only.</text>
+              <text x="450" y="214" textAnchor="middle" fontFamily="var(--font-body)" fontSize="12.5" fill="var(--text-muted)">All the tools in one place.</text>
+
+              {/* distribution bus */}
+              <line x1="450" y1="244" x2="450" y2="286" stroke="var(--text-faint)" strokeWidth="1.5" />
+              <text x="462" y="270" fontFamily="var(--font-body)" fontSize="11" fill="var(--text-muted)">reads information from</text>
+              <line x1="165" y1="286" x2="735" y2="286" stroke="var(--text-faint)" strokeWidth="1.5" />
+              <line x1="165" y1="286" x2="165" y2="318" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
+              <line x1="450" y1="286" x2="450" y2="318" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
+              <line x1="735" y1="286" x2="735" y2="318" stroke="var(--text-faint)" strokeWidth="1.5" markerEnd="url(#kbarrow)" />
+
+              {/* Sources */}
+              <rect x="35" y="320" width="260" height="120" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="165" y="360" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Staff accounts</text>
+              <text x="165" y="384" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Decides who can log in.</text>
+              <text x="165" y="402" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Customers are not in it.</text>
+
+              <rect x="320" y="320" width="260" height="120" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="450" y="360" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Online shop</text>
+              <text x="450" y="384" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Customers, orders,</text>
+              <text x="450" y="402" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">and quiz results.</text>
+
+              <rect x="605" y="320" width="260" height="120" rx="10" fill="var(--surface)" stroke="var(--border-2)" />
+              <text x="735" y="360" textAnchor="middle" fontFamily="var(--font-body)" fontSize="14" fontWeight="600" fill="var(--text-strong)">Operations</text>
+              <text x="735" y="384" textAnchor="middle" fontFamily="var(--font-body)" fontSize="11.5" fill="var(--text-muted)">Product barcodes.</text>
+            </svg>
           </div>
         </div>
 
