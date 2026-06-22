@@ -36,6 +36,36 @@ export async function addNote(formData: FormData) {
   revalidatePath(`/customers/${customerId}`);
 }
 
+/** Edit core customer fields: name, lifecycle stage, tags. */
+export async function updateCustomer(formData: FormData) {
+  const customerId = String(formData.get("customerId") || "");
+  if (!customerId) return;
+
+  const user = await staffUser();
+  if (!user) return;
+
+  const fullName = String(formData.get("full_name") || "").trim() || null;
+  const lifecycle = String(formData.get("lifecycle_stage") || "");
+  const tagsRaw = String(formData.get("tags") || "").trim();
+  const tags = tagsRaw ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean) : [];
+
+  const patch: Record<string, unknown> = { full_name: fullName, tags, updated_at: new Date().toISOString() };
+  if (["lead", "customer", "subscriber", "churned"].includes(lifecycle)) patch.lifecycle_stage = lifecycle;
+
+  await createAdminClient().from("customers").update(patch).eq("id", customerId);
+
+  await logAudit({
+    actorId: user.id,
+    actorEmail: user.email,
+    action: "update_customer",
+    entityType: "customer",
+    entityId: customerId,
+    detail: patch,
+  });
+
+  revalidatePath(`/customers/${customerId}`);
+}
+
 /** Record a marketing-consent change (append-only). */
 export async function setConsent(formData: FormData) {
   const customerId = String(formData.get("customerId") || "");

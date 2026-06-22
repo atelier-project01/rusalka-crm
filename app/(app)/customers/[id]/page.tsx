@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
-import { addNote, setConsent } from "./actions";
+import { addNote, setConsent, updateCustomer } from "./actions";
 import { createCareItem } from "../../care/actions";
+import RowLink from "@/app/_components/row-link";
 import { Sparkles, Check } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -38,8 +39,8 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
     { data: careItems },
   ] = await Promise.all([
     db.from("customers").select("id, email, full_name, lifecycle_stage, tags, created_at").eq("id", id).maybeSingle(),
-    db.from("customer_orders").select("id, items, subscription_plan, subtotal, discount, total, status, created_at, shipping_name, shipping_address, shipping_postal_code, shipping_city, shipping_country, shipping_email").eq("user_id", id).order("created_at", { ascending: false }),
-    db.from("quiz_results").select("id, skin_type, concerns, recommended_serum, recommended_cleanser, recommended_moisturizer, created_at").eq("user_id", id).order("created_at", { ascending: false }),
+    db.from("customer_orders").select("id, items, subscription_plan, subtotal, discount, total, status, created_at, next_shipment_at, shipping_name, shipping_address, shipping_postal_code, shipping_city, shipping_country, shipping_email").eq("user_id", id).order("created_at", { ascending: false }),
+    db.from("quiz_results").select("id, skin_type, concerns, fragrance_choice, recommended_serum, recommended_cleanser, recommended_moisturizer, created_at").eq("user_id", id).order("created_at", { ascending: false }),
     db.from("customer_interactions").select("id, body, author, created_at").eq("customer_id", id).order("created_at", { ascending: true }),
     db.from("consents").select("opted_in, created_at").eq("customer_id", id).eq("channel", "marketing_email").order("created_at", { ascending: false }).limit(1),
     db.from("care_items").select("id, subject, status, created_at").eq("customer_id", id).order("created_at", { ascending: false }),
@@ -197,6 +198,66 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
             </form>
           </div>
         </div>
+        </div>
+      </div>
+
+      {(latest?.subscription_plan || latest?.next_shipment_at) ? (
+        <div className="card" style={{ marginTop: "var(--gap)" }}>
+          <div className="card-h"><h2>Subscription</h2></div>
+          <div className="card-b flush">
+            <div className="fieldrow"><span className="fk">Plan</span><span className="fv">{latest.subscription_plan ?? "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Next shipment</span><span className="fv">{latest.next_shipment_at ? new Date(latest.next_shipment_at).toLocaleDateString() : "—"}</span></div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="card" style={{ marginTop: "var(--gap)" }}>
+        <div className="card-h"><h2>Order history</h2><span className="sub">{orderCount} order(s)</span></div>
+        <div className="card-b flush">{orders && orders.length ? (<div className="twrap"><table className="tbl">
+          <thead><tr><th>Order</th><th>Date</th><th>Items</th><th>Status</th><th className="right">Total</th></tr></thead>
+          <tbody>
+            {orders.map((o) => (
+              <RowLink key={o.id} href={`/fulfillment/${o.id}`}>
+                <td className="cstrong">#{o.id.slice(0, 8)}</td>
+                <td className="muted">{new Date(o.created_at).toLocaleDateString()}</td>
+                <td className="muted">{Array.isArray(o.items) ? (o.items as OrderItem[]).length : 0}</td>
+                <td><span className="chip neutral">{o.status}</span></td>
+                <td className="right">€{Number(o.total).toFixed(2)}</td>
+              </RowLink>
+            ))}
+          </tbody>
+        </table></div>) : <div className="muted" style={{ padding: "var(--pad)", fontSize: "var(--fs-sm)" }}>No orders.</div>}</div>
+      </div>
+
+      {quizzes && quizzes.length ? (
+        <div className="card" style={{ marginTop: "var(--gap)" }}>
+          <div className="card-h"><h2>Latest consultation</h2><span className="sub">{when(quizzes[0].created_at)}</span></div>
+          <div className="card-b flush">
+            <div className="fieldrow"><span className="fk">Skin type</span><span className="fv">{quizzes[0].skin_type ?? "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Concerns</span><span className="fv">{Array.isArray(quizzes[0].concerns) ? quizzes[0].concerns.join(", ") : (quizzes[0].concerns ?? "—")}</span></div>
+            <div className="fieldrow"><span className="fk">Fragrance</span><span className="fv">{quizzes[0].fragrance_choice ?? "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Serum</span><span className="fv">{quizzes[0].recommended_serum ?? "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Cleanser</span><span className="fv">{quizzes[0].recommended_cleanser ?? "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Moisturizer</span><span className="fv">{quizzes[0].recommended_moisturizer ?? "—"}</span></div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="card" style={{ marginTop: "var(--gap)" }}>
+        <div className="card-h"><h2>Edit customer</h2></div>
+        <div className="card-b">
+          <form action={updateCustomer} style={{ display: "grid", gap: 10, maxWidth: 420 }}>
+            <input type="hidden" name="customerId" value={id} />
+            <label style={{ display: "grid", gap: 4 }}><span className="fk">Full name</span>
+              <input name="full_name" defaultValue={customer.full_name ?? ""} placeholder="Full name" style={{ height: 31, padding: "0 10px", fontSize: "var(--fs-sm)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", background: "var(--surface)", color: "var(--text-strong)", outline: "none" }} /></label>
+            <label style={{ display: "grid", gap: 4 }}><span className="fk">Lifecycle stage</span>
+              <select name="lifecycle_stage" defaultValue={customer.lifecycle_stage} style={{ height: 31, padding: "0 10px", fontSize: "var(--fs-sm)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", background: "var(--surface)", color: "var(--text-strong)", outline: "none" }}>
+                <option value="lead">lead</option><option value="customer">customer</option><option value="subscriber">subscriber</option><option value="churned">churned</option>
+              </select></label>
+            <label style={{ display: "grid", gap: 4 }}><span className="fk">Tags (comma-separated)</span>
+              <input name="tags" defaultValue={(customer.tags ?? []).join(", ")} placeholder="vip, wholesale" style={{ height: 31, padding: "0 10px", fontSize: "var(--fs-sm)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", background: "var(--surface)", color: "var(--text-strong)", outline: "none" }} /></label>
+            <div><button className="btn pri sm" type="submit">Save changes</button></div>
+          </form>
         </div>
       </div>
 

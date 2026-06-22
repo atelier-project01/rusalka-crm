@@ -51,9 +51,15 @@ export default function FulfillmentClient({
 }) {
   const [selId, setSelId] = useState<string | null>(initialSelId ?? orders[0]?.id ?? null);
   const selected = orders.find((o) => o.id === selId) ?? orders[0] ?? null;
+  const [q, setQ] = useState("");
 
   const withStage = orders.map((o) => ({ o, stage: stageOf(o) }));
   const count = (k: string) => withStage.filter((x) => x.stage.key === k).length;
+  const ql = q.trim().toLowerCase();
+  const shown = ql
+    ? withStage.filter(({ o }) =>
+        `${o.id} ${emailById[o.user_id] ?? ""} ${o.shipping_name ?? ""}`.toLowerCase().includes(ql))
+    : withStage;
   const selItems = Array.isArray(selected?.items) ? (selected!.items as OrderItem[]) : [];
   const selStage = selected ? stageOf(selected) : null;
 
@@ -70,11 +76,13 @@ export default function FulfillmentClient({
 
       <div className="w-main">
         <div className="card">
-          <div className="card-h"><h2>Order queue</h2><span className="sub">{orders.length} order(s)</span></div>
+          <div className="card-h"><h2>Order queue</h2><span className="sub">{shown.length} of {orders.length}</span>
+            <div className="ha"><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search order, customer, name…" style={{ height: 29, padding: "0 11px", fontSize: "var(--fs-xs)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", background: "var(--surface)", color: "var(--text-strong)", outline: "none", minWidth: 220 }} /></div>
+          </div>
           <div className="card-b flush"><div className="twrap"><table className="tbl">
             <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th className="right">Total</th><th>Stage</th><th>Age</th></tr></thead>
             <tbody>
-              {withStage.map(({ o, stage }) => (
+              {shown.map(({ o, stage }) => (
                 <tr
                   key={o.id}
                   className={`rowsel${selected && o.id === selected.id ? " sel" : ""}`}
@@ -90,7 +98,7 @@ export default function FulfillmentClient({
                   <td className="muted">{ago(o.created_at)}</td>
                 </tr>
               ))}
-              {!orders.length && <tr><td colSpan={6} className="muted">No orders.</td></tr>}
+              {!shown.length && <tr><td colSpan={6} className="muted">{orders.length ? "No matches." : "No orders."}</td></tr>}
             </tbody>
           </table></div></div>
         </div>
