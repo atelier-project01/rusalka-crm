@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import BarcodeImage from "./barcode-image";
 
 const STATUS_CHIP: Record<string, string> = { available: "ok", reserved: "warn", used: "info", activated: "violet", voided: "danger" };
 
@@ -42,6 +43,8 @@ export default function BarcodeClient({
 }) {
   const [selGtin, setSelGtin] = useState<string | null>(initialSelGtin ?? rows[0]?.gtin ?? null);
   const selected = rows.find((r) => r.gtin === selGtin) ?? rows[0] ?? null;
+  const [fmt, setFmt] = useState<string | null>(null);
+  const effFmt = fmt ?? (selected && /^\d{13}$/.test(selected.gtin) ? "EAN13" : selected && /^\d{12}$/.test(selected.gtin) ? "UPC" : "CODE128");
 
   const statuses = ["available", "reserved", "used", "activated", "voided"];
   const qp = (extra: Record<string, string>) => {
@@ -95,15 +98,16 @@ export default function BarcodeClient({
         {selected ? (
           <div className="col-card">
             <div className="minihead"><h3>GTIN detail</h3><span className="ha"><span className={`chip ${STATUS_CHIP[selected.status] ?? "neutral"}`}>{selected.status}</span></span></div>
-            <div className="barcode" />
+            <div className="barcode"><BarcodeImage value={selected.gtin} format={effFmt} /></div>
             <div className="barcode-cap">{selected.gtin}</div>
             <div className="fieldrow"><span className="fk">Product</span><span className="fv">{nameByGtin[selected.gtin] ?? selected.item_ref ?? "Unassigned"}</span></div>
             <div className="fieldrow"><span className="fk">Issuer</span><span className="fv">{selected.issuer_id ? brandById[selected.issuer_id] ?? "—" : "—"}</span></div>
             <div className="fieldrow"><span className="fk">Brand prefix</span><span className="fv">{selected.issuer_id ? prefixById[selected.issuer_id] ?? "—" : "—"}</span></div>
             <div className="fieldrow"><span className="fk">Format</span><span className="fv">{selected.symbology}</span></div>
             <div className="panelactions">
-              <button className="btn" type="button">Generate EAN</button>
-              <button className="btn" type="button">Generate UPC</button>
+              <button className={`btn${effFmt === "EAN13" ? " pri" : ""}`} type="button" onClick={() => setFmt("EAN13")}>EAN-13</button>
+              <button className={`btn${effFmt === "UPC" ? " pri" : ""}`} type="button" onClick={() => setFmt("UPC")}>UPC-A</button>
+              <button className={`btn${effFmt === "CODE128" ? " pri" : ""}`} type="button" onClick={() => setFmt("CODE128")}>Code 128</button>
             </div>
           </div>
         ) : (
