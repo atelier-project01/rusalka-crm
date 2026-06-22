@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import EmptyState from "@/app/_components/empty-state";
+import RowLink from "@/app/_components/row-link";
 
 export const dynamic = "force-dynamic";
 
@@ -62,12 +62,8 @@ export default async function CustomersPage() {
                 </thead>
                 <tbody>
                   {customers.map((c) => (
-                    <tr key={c.id}>
-                      <td>
-                        <Link className="clink" href={`/customers/${c.id}`}>
-                          {c.full_name || c.email || c.id.slice(0, 8)}
-                        </Link>
-                      </td>
+                    <RowLink key={c.id} href={`/customers/${c.id}`}>
+                      <td className="cstrong">{c.full_name || c.email || c.id.slice(0, 8)}</td>
                       <td className="muted">{c.email ?? "—"}</td>
                       <td>
                         <span className={`chip ${LIFECYCLE_CHIP[c.lifecycle_stage] ?? "neutral"}`}>
@@ -77,7 +73,7 @@ export default async function CustomersPage() {
                       </td>
                       <td className="muted">{c.tags?.length ? c.tags.join(", ") : "—"}</td>
                       <td className="muted">{new Date(c.created_at).toLocaleDateString()}</td>
-                    </tr>
+                    </RowLink>
                   ))}
                 </tbody>
               </table>

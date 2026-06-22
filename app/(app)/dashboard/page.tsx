@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/auth";
 import { stageOf } from "@/lib/fulfillment";
+import RowLink from "@/app/_components/row-link";
 import { Package, UserPlus, RefreshCw, ClipboardCheck, ShieldAlert } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -70,13 +71,13 @@ export default async function DashboardPage() {
           <div className="card-b flush">{queue.length ? (<div className="twrap"><table className="tbl">
             <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Stage</th><th className="right">Total</th><th>Age</th></tr></thead>
             <tbody>{queue.map((o) => { const s = stageOf(o); return (
-              <tr key={o.id}>
-                <td><Link className="clink" href={`/fulfillment?sel=${o.id}`}>#{o.id.slice(0, 8)}</Link></td>
+              <RowLink key={o.id} href={`/fulfillment?sel=${o.id}`}>
+                <td className="cstrong">#{o.id.slice(0, 8)}</td>
                 <td className="cstrong">{emailById.get(o.user_id) ?? o.user_id.slice(0, 8)}</td>
                 <td className="muted">{Array.isArray(o.items) ? (o.items as OrderItem[]).length : 0}</td>
                 <td><span className={`chip ${s.chip}`}><span className="cdot" />{s.label}</span></td>
                 <td className="right">€{Number(o.total).toFixed(2)}</td><td className="muted">{ago(o.created_at)}</td>
-              </tr>); })}
+              </RowLink>); })}
             </tbody>
           </table></div>) : <div className="card-b muted" style={{ fontSize: "var(--fs-sm)" }}>No orders yet.</div>}</div>
         </div></div>

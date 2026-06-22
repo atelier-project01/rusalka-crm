@@ -23,21 +23,30 @@ function when(iso: string) {
 export default async function CustomerDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = createAdminClient();
-
-  const { data: customer } = await db
-    .from("customers").select("id, email, full_name, lifecycle_stage, tags, created_at").eq("id", id).maybeSingle();
-  if (!customer) notFound();
-
   const user = await getCurrentUser();
-  await logAudit({ actorId: user?.id, actorEmail: user?.email, action: "view_customer", entityType: "customer", entityId: id });
 
-  const [{ data: orders }, { data: quizzes }, { data: notes }, { data: consentRows }, { data: careItems }] = await Promise.all([
+  // Fetch the customer and all related records in ONE parallel batch (they only
+  // depend on the id), and write the audit log alongside — instead of three
+  // sequential round-trips (customer → audit → related). Cuts the time to open
+  // a profile down to a single round-trip.
+  const [
+    { data: customer },
+    { data: orders },
+    { data: quizzes },
+    { data: notes },
+    { data: consentRows },
+    { data: careItems },
+  ] = await Promise.all([
+    db.from("customers").select("id, email, full_name, lifecycle_stage, tags, created_at").eq("id", id).maybeSingle(),
     db.from("customer_orders").select("id, items, subscription_plan, total, status, created_at").eq("user_id", id).order("created_at", { ascending: false }),
     db.from("quiz_results").select("id, skin_type, concerns, recommended_serum, recommended_cleanser, recommended_moisturizer, created_at").eq("user_id", id).order("created_at", { ascending: false }),
     db.from("customer_interactions").select("id, body, author, created_at").eq("customer_id", id).order("created_at", { ascending: true }),
     db.from("consents").select("opted_in, created_at").eq("customer_id", id).eq("channel", "marketing_email").order("created_at", { ascending: false }).limit(1),
     db.from("care_items").select("id, subject, status, created_at").eq("customer_id", id).order("created_at", { ascending: false }),
+    logAudit({ actorId: user?.id, actorEmail: user?.email, action: "view_customer", entityType: "customer", entityId: id }),
   ]);
+
+  if (!customer) notFound();
 
   const consent = consentRows?.[0];
   const name = customer.full_name || customer.email || customer.id.slice(0, 8);
