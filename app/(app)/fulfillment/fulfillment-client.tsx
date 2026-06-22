@@ -26,6 +26,7 @@ export type FulfillmentOrder = {
   shipping_city: string | null;
   shipping_country: string | null;
   shipping_email: string | null;
+  shipping_phone: string | null;
 };
 
 function ago(iso: string) {
@@ -117,6 +118,7 @@ export default function FulfillmentClient({
             <div className="fieldrow"><span className="fk">Ship to</span><span className="fv">{selected.shipping_name ?? "—"}</span></div>
             <div className="fieldrow"><span className="fk">Address</span><span className="fv">{[selected.shipping_address, selected.shipping_postal_code, selected.shipping_city, selected.shipping_country].filter(Boolean).join(", ") || "—"}</span></div>
             <div className="fieldrow"><span className="fk">Email</span><span className="fv">{selected.shipping_email ?? emailById[selected.user_id] ?? "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Phone</span><span className="fv">{selected.shipping_phone ?? "Not captured"}</span></div>
             <div className="panelactions">
               <PrintButton />
               <Link className="btn sm" href={`/fulfillment/${selected.id}`}>Open full order</Link>

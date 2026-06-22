@@ -39,7 +39,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
     { data: careItems },
   ] = await Promise.all([
     db.from("customers").select("id, email, full_name, lifecycle_stage, tags, created_at").eq("id", id).maybeSingle(),
-    db.from("customer_orders").select("id, items, subscription_plan, subtotal, discount, total, status, created_at, next_shipment_at, shipping_name, shipping_address, shipping_postal_code, shipping_city, shipping_country, shipping_email").eq("user_id", id).order("created_at", { ascending: false }),
+    db.from("customer_orders").select("id, items, subscription_plan, subtotal, discount, total, status, created_at, next_shipment_at, shipping_name, shipping_address, shipping_postal_code, shipping_city, shipping_country, shipping_email, shipping_phone").eq("user_id", id).order("created_at", { ascending: false }),
     db.from("quiz_results").select("id, skin_type, concerns, fragrance_choice, recommended_serum, recommended_cleanser, recommended_moisturizer, created_at").eq("user_id", id).order("created_at", { ascending: false }),
     db.from("customer_interactions").select("id, body, author, created_at").eq("customer_id", id).order("created_at", { ascending: true }),
     db.from("consents").select("opted_in, created_at").eq("customer_id", id).eq("channel", "marketing_email").order("created_at", { ascending: false }).limit(1),
@@ -141,7 +141,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
           <div className="fieldrow"><span className="fk">Email</span><span className="fv">{latest?.shipping_email ?? customer.email ?? "—"}</span></div>
           <div className="fieldrow"><span className="fk">Ship to</span><span className="fv">{latest?.shipping_name ?? customer.full_name ?? "—"}</span></div>
           <div className="fieldrow"><span className="fk">Address</span><span className="fv">{latest ? ([latest.shipping_address, latest.shipping_postal_code, latest.shipping_city, latest.shipping_country].filter(Boolean).join(", ") || "—") : "—"}</span></div>
-          <div className="fieldrow"><span className="fk">Phone</span><span className="fv muted">Not captured</span></div>
+          <div className="fieldrow"><span className="fk">Phone</span><span className="fv">{latest?.shipping_phone ?? "Not captured"}</span></div>
         </div>
 
         </div>

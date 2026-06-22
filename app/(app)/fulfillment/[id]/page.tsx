@@ -15,7 +15,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
 
   const { data: order } = await db
     .from("customer_orders")
-    .select("id, user_id, items, subscription_plan, subtotal, total, status, printed_at, fulfilled_at, created_at, shipping_name, shipping_email, shipping_address, shipping_city, shipping_country, shipping_postal_code")
+    .select("id, user_id, items, subscription_plan, subtotal, total, status, printed_at, fulfilled_at, created_at, shipping_name, shipping_email, shipping_phone, shipping_address, shipping_city, shipping_country, shipping_postal_code")
     .eq("id", id)
     .maybeSingle();
   if (!order) notFound();
@@ -76,6 +76,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
           <div className="fieldrow"><span className="fk">Ship to</span><span className="fv">{order.shipping_name ?? "—"}</span></div>
           <div className="fieldrow"><span className="fk">Address</span><span className="fv">{[order.shipping_address, order.shipping_city, order.shipping_postal_code, order.shipping_country].filter(Boolean).join(", ") || "—"}</span></div>
           <div className="fieldrow"><span className="fk">Email</span><span className="fv">{order.shipping_email ?? customer?.email ?? "—"}</span></div>
+          <div className="fieldrow"><span className="fk">Phone</span><span className="fv">{order.shipping_phone ?? "Not captured"}</span></div>
           <div className="fieldrow"><span className="fk">Placed</span><span className="fv">{new Date(order.created_at).toLocaleString()}</span></div>
         </div>
       </div>
