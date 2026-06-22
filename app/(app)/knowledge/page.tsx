@@ -13,14 +13,17 @@ import {
   ShoppingCart,
   Database,
   Workflow,
+  ScrollText,
+  Sparkles,
 } from "lucide-react";
 
 const MODULES = [
-  { icon: <LayoutDashboard size={16} />, name: "Overview Dashboard", desc: "A morning view of what needs attention: orders to pack, new customers, and open issues.", ready: true },
-  { icon: <UserRound size={16} />, name: "Customer 360", desc: "One customer in one view: their orders, consultations, notes, and marketing consent.", ready: true },
-  { icon: <Truck size={16} />, name: "Fulfillment", desc: "The order queue and pack room. Move an order from reserved to shipped and print its pack sheet.", ready: true },
-  { icon: <ScanBarcode size={16} />, name: "Barcode / GTIN", desc: "The product barcode pool, with search and label details.", ready: true },
-  { icon: <Headset size={16} />, name: "Customer Care", desc: "Log a customer question, assign it to someone, and mark it resolved.", ready: true },
+  { icon: <LayoutDashboard size={16} />, name: "Overview Dashboard", desc: "A morning view of what needs attention: orders to pack, new customers, and open issues. Click any queue row to open the order.", ready: true },
+  { icon: <UserRound size={16} />, name: "Customer 360", desc: "One customer in one view: contact and shipping, full order history, a revenue breakdown, subscription, latest consultation, notes and consent — and you can edit their details.", ready: true },
+  { icon: <Truck size={16} />, name: "Fulfillment", desc: "The order queue and pack room. Full shipping address and price breakdown, a searchable queue, advance an order from reserved to shipped, and print its pack sheet.", ready: true },
+  { icon: <ScanBarcode size={16} />, name: "Barcode / GTIN", desc: "The product barcode pool, with search. Renders a real, scannable EAN-13 / UPC-A / Code-128 barcode for any GTIN.", ready: true },
+  { icon: <Headset size={16} />, name: "Customer Care", desc: "Log a customer question, set its priority and a due date, assign it to anyone, reply in a thread, and mark it resolved.", ready: true },
+  { icon: <ScrollText size={16} />, name: "Audit log", desc: "A record of sensitive actions — who viewed or changed what, and when. Admin only.", ready: true },
   { icon: <Megaphone size={16} />, name: "Marketing Campaigns", desc: "Sending offers to groups of customers. Planned as a separate step, not part of this version.", ready: false },
 ];
 
@@ -40,6 +43,24 @@ export default function KnowledgePage() {
           <div className="card-h"><span className="hicon io-info"><Info size={15} /></span><h2>What this is</h2></div>
           <div className="kbtext">
             This is the staff hub for <b>Atelier Rusalka</b>. It puts orders, customer details, product barcodes, and support notes in one place, so the team does not switch between systems all day. It is for staff only. Customers never see it. Use the menu on the left to move between the tools. You only see the tools your role needs.
+          </div>
+        </div>
+
+        {/* what's new this session */}
+        <div className="card full">
+          <div className="card-h"><span className="hicon io-ok"><Sparkles size={15} /></span><h2>What&apos;s new</h2></div>
+          <div className="card-b flush">
+            <div className="attlist">
+              <div className="att"><span className="ic io-ok"><CircleCheck size={16} /></span><div className="ab"><div className="at">Faster, instant navigation</div><div className="am">Pages and row selection respond instantly — no more lag when moving between screens or selecting a row.</div></div><span className="aw"><span className="chip ok"><span className="cdot" />New</span></span></div>
+              <div className="att"><span className="ic io-ok"><CircleCheck size={16} /></span><div className="ab"><div className="at">Richer Customer 360</div><div className="am">Contact &amp; shipping, a revenue breakdown, full order history, subscription, the latest consultation, and inline editing of the customer&apos;s details.</div></div><span className="aw"><span className="chip ok"><span className="cdot" />New</span></span></div>
+              <div className="att"><span className="ic io-ok"><CircleCheck size={16} /></span><div className="ab"><div className="at">Full shipping on Fulfillment</div><div className="am">The pack panel shows the complete address, email and phone, plus a price breakdown — and the queue is searchable.</div></div><span className="aw"><span className="chip ok"><span className="cdot" />New</span></span></div>
+              <div className="att"><span className="ic io-ok"><CircleCheck size={16} /></span><div className="ab"><div className="at">Global search</div><div className="am">The top-bar search now finds customers, orders, care items and GTINs.</div></div><span className="aw"><span className="chip ok"><span className="cdot" />New</span></span></div>
+              <div className="att"><span className="ic io-ok"><CircleCheck size={16} /></span><div className="ab"><div className="at">Stronger Customer Care</div><div className="am">Priority, due dates, reply threads, and reassign to anyone.</div></div><span className="aw"><span className="chip ok"><span className="cdot" />New</span></span></div>
+              <div className="att"><span className="ic io-ok"><CircleCheck size={16} /></span><div className="ab"><div className="at">Real barcodes &amp; audit log</div><div className="am">GTINs render as scannable barcodes, and admins get an audit log of sensitive actions.</div></div><span className="aw"><span className="chip ok"><span className="cdot" />New</span></span></div>
+            </div>
+            <div className="kbtext muted" style={{ borderTop: "1px solid var(--border)" }}>
+              Coming next: capturing the delivery phone at checkout (the field is ready and shows here the moment the store sends it), and barcode status actions.
+            </div>
           </div>
         </div>
 
