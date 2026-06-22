@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { stageOf } from "@/lib/fulfillment";
 import { Package, UserPlus, RefreshCw, ClipboardCheck, ShieldAlert } from "lucide-react";
 
@@ -19,7 +19,7 @@ const ICONS = {
 export default async function DashboardPage() {
   const db = createAdminClient();
   const since30 = new Date(Date.now() - 30 * 864e5).toISOString();
-  const { data: { user } } = await (await createClient()).auth.getUser();
+  const user = await getCurrentUser();
   const who = (user?.email ?? "there").replace(/@.*/, "");
 
   const [awaiting, newCust, subs, quizzes, customersRes, consentsRes, queueRes] = await Promise.all([

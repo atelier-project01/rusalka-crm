@@ -115,6 +115,16 @@ button{font-family:inherit;cursor:pointer;} a{color:inherit;text-decoration:none
 .screen.on{display:block;}
 @keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
 
+/* ── Skeletons (instant navigation feedback) ──────────────────────────── */
+@keyframes sk-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+.sk{background:var(--surface-3);border-radius:var(--radius);animation:sk-pulse 1.1s ease-in-out infinite;}
+.sk-title{height:19px;width:210px;}
+.sk-text{height:12px;width:280px;}
+.sk-line{height:12px;width:100%;}
+.sk-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;}
+@media (max-width:900px){.sk-cards{grid-template-columns:repeat(2,1fr);}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none;}}
+
 /* ============ SHARED COMPONENTS ============ */
 .pagehead{display:flex;align-items:flex-start;gap:16px;margin-bottom:var(--gap);flex-wrap:wrap;}
 .pagehead h1{font-size:var(--fs-h1);line-height:1.12;}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { addNote, setConsent } from "./actions";
 import { createCareItem } from "../../care/actions";
@@ -28,7 +28,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
     .from("customers").select("id, email, full_name, lifecycle_stage, tags, created_at").eq("id", id).maybeSingle();
   if (!customer) notFound();
 
-  const { data: { user } } = await (await createClient()).auth.getUser();
+  const user = await getCurrentUser();
   await logAudit({ actorId: user?.id, actorEmail: user?.email, action: "view_customer", entityType: "customer", entityId: id });
 
   const [{ data: orders }, { data: quizzes }, { data: notes }, { data: consentRows }, { data: careItems }] = await Promise.all([
