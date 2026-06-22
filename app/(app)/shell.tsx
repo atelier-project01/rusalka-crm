@@ -17,6 +17,7 @@ import {
   LogOut,
   Menu,
   BookOpen,
+  ScrollText,
 } from "lucide-react";
 
 type ModuleDef = {
@@ -34,6 +35,7 @@ const MODULES: ModuleDef[] = [
   { key: "barcode", href: "/barcode", label: "Barcode / GTIN", section: "Barcode / GTIN", icon: <ScanBarcode size={18} /> },
   { key: "care", href: "/care", label: "Customer Care", section: "Customer Care", icon: <Headset size={18} /> },
   { key: "knowledge", href: "/knowledge", label: "Knowledge Base", section: "Knowledge Base", icon: <BookOpen size={18} /> },
+  { key: "audit", href: "/audit", label: "Audit log", section: "Audit log", icon: <ScrollText size={18} /> },
 ];
 
 export default function Shell({
@@ -74,11 +76,11 @@ export default function Shell({
           <div className="mark">AR</div>
           <div className="wm"><b>Atelier Rusalka</b><span>CRM &amp; Operations Hub</span></div>
         </div>
-        <div className="search">
+        <form className="search" action="/search">
           <span className="si"><Search size={15} /></span>
-          <input type="text" placeholder="Search customers, orders, GTINs, care items" />
+          <input type="text" name="q" placeholder="Search customers, orders, GTINs, care items" />
           <span className="kbd">⌘K</span>
-        </div>
+        </form>
         <div className="top-right">
           <button className="iconbtn hide-sm" title="Help"><HelpCircle size={18} /></button>
           <button className="iconbtn" title="Notifications"><Bell size={18} /></button>
