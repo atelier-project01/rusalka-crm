@@ -14,14 +14,18 @@ export type FulfillmentOrder = {
   items: unknown;
   subscription_plan: string | null;
   subtotal: number | null;
+  discount: number | null;
   total: number | null;
   status: string;
   printed_at: string | null;
   fulfilled_at: string | null;
   created_at: string;
   shipping_name: string | null;
+  shipping_address: string | null;
+  shipping_postal_code: string | null;
   shipping_city: string | null;
   shipping_country: string | null;
+  shipping_email: string | null;
 };
 
 function ago(iso: string) {
@@ -97,12 +101,17 @@ export default function FulfillmentClient({
           <div className="col-card">
             <div className="minihead"><h3>Order #{selected.id.slice(0, 8)}</h3><span className="ha"><span className={`chip ${selStage.chip}`}><span className="cdot" />{selStage.label}</span></span></div>
             {selItems.map((it, i) => (<div className="lineitem" key={i}><div><div className="liname">{it.productName ?? "Item"}</div>{it.category ? <div className="lisub">{it.category}</div> : null}</div><span className="liprice">€{Number(it.price ?? 0).toFixed(2)}</span></div>))}
+            <div className="fieldrow"><span className="fk">Subtotal</span><span className="fv">€{Number(selected.subtotal ?? selected.total ?? 0).toFixed(2)}</span></div>
+            {selected.discount ? <div className="fieldrow"><span className="fk">Discount</span><span className="fv">−€{Number(selected.discount).toFixed(2)}</span></div> : null}
             <div className="linetotal"><span>Order total</span><span>€{Number(selected.total).toFixed(2)}</span></div>
             <div className="fieldrow"><span className="fk">Customer</span><span className="fv clink"><Link href={`/customers/${selected.user_id}`}>{emailById[selected.user_id] ?? "—"}</Link></span></div>
-            <div className="fieldrow"><span className="fk">Plan</span><span className="fv">{selected.subscription_plan}</span></div>
-            <div className="fieldrow"><span className="fk">Ship to</span><span className="fv">{[selected.shipping_name, selected.shipping_city, selected.shipping_country].filter(Boolean).join(", ") || "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Plan</span><span className="fv">{selected.subscription_plan ?? "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Ship to</span><span className="fv">{selected.shipping_name ?? "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Address</span><span className="fv">{[selected.shipping_address, selected.shipping_postal_code, selected.shipping_city, selected.shipping_country].filter(Boolean).join(", ") || "—"}</span></div>
+            <div className="fieldrow"><span className="fk">Email</span><span className="fv">{selected.shipping_email ?? emailById[selected.user_id] ?? "—"}</span></div>
             <div className="panelactions">
               <PrintButton />
+              <Link className="btn sm" href={`/fulfillment/${selected.id}`}>Open full order</Link>
               {(selStage.key === "reserved" || selStage.key === "printed") && (
                 <form action={advanceOrder}><input type="hidden" name="id" value={selected.id} /><button className="btn pri" type="submit" style={{ width: "100%" }}>{selStage.key === "reserved" ? "Advance to Printed" : "Advance to Fulfilled"}</button></form>
               )}

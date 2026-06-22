@@ -38,7 +38,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
     { data: careItems },
   ] = await Promise.all([
     db.from("customers").select("id, email, full_name, lifecycle_stage, tags, created_at").eq("id", id).maybeSingle(),
-    db.from("customer_orders").select("id, items, subscription_plan, total, status, created_at").eq("user_id", id).order("created_at", { ascending: false }),
+    db.from("customer_orders").select("id, items, subscription_plan, subtotal, discount, total, status, created_at, shipping_name, shipping_address, shipping_postal_code, shipping_city, shipping_country, shipping_email").eq("user_id", id).order("created_at", { ascending: false }),
     db.from("quiz_results").select("id, skin_type, concerns, recommended_serum, recommended_cleanser, recommended_moisturizer, created_at").eq("user_id", id).order("created_at", { ascending: false }),
     db.from("customer_interactions").select("id, body, author, created_at").eq("customer_id", id).order("created_at", { ascending: true }),
     db.from("consents").select("opted_in, created_at").eq("customer_id", id).eq("channel", "marketing_email").order("created_at", { ascending: false }).limit(1),
@@ -53,7 +53,12 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
   const initials = (customer.full_name || customer.email || "?").slice(0, 2).toUpperCase();
   const ltv = (orders ?? []).reduce((s, o) => s + Number(o.total || 0), 0);
   const avg = orders && orders.length ? ltv / orders.length : 0;
+  const gross = (orders ?? []).reduce((s, o) => s + Number(o.subtotal || 0), 0);
+  const discounts = (orders ?? []).reduce((s, o) => s + Number(o.discount || 0), 0);
+  const orderCount = orders?.length ?? 0;
+  const firstOrder = orderCount ? orders![orderCount - 1] : undefined;
   const latest = orders?.[0];
+  const daysSinceLast = latest ? Math.floor((Date.now() - new Date(latest.created_at).getTime()) / 864e5) : null;
   const latestItems = (Array.isArray(latest?.items) ? latest!.items : []) as OrderItem[];
 
   // Recent activity timeline (merge orders + quizzes + care)
@@ -129,6 +134,15 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
           </>) : <div className="lineitem"><div className="liname muted">No orders</div></div>}
         </div>
 
+        {/* contact & shipping (from the most recent order) */}
+        <div className="ck-contact col-card">
+          <div className="minihead"><h3>Contact &amp; shipping</h3></div>
+          <div className="fieldrow"><span className="fk">Email</span><span className="fv">{latest?.shipping_email ?? customer.email ?? "—"}</span></div>
+          <div className="fieldrow"><span className="fk">Ship to</span><span className="fv">{latest?.shipping_name ?? customer.full_name ?? "—"}</span></div>
+          <div className="fieldrow"><span className="fk">Address</span><span className="fv">{latest ? ([latest.shipping_address, latest.shipping_postal_code, latest.shipping_city, latest.shipping_country].filter(Boolean).join(", ") || "—") : "—"}</span></div>
+          <div className="fieldrow"><span className="fk">Phone</span><span className="fv muted">Not captured</span></div>
+        </div>
+
         </div>
         <div className="ck-col ck-center">
         {/* conversation -> internal notes */}
@@ -155,7 +169,12 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
           <div className="aih" style={{ borderBottom: "1px solid var(--border)" }}><span className="spark"><Sparkles size={16} /></span><h3>Summary</h3></div>
           <div className="fieldrow"><span className="fk">Lifecycle</span><span className="fv"><span className={`chip ${LIFECYCLE_CHIP[customer.lifecycle_stage] ?? "neutral"}`}><span className="cdot" />{customer.lifecycle_stage}</span></span></div>
           <div className="fieldrow"><span className="fk">Orders</span><span className="fv">{orders?.length ?? 0}</span></div>
-          <div className="fieldrow"><span className="fk">Lifetime value</span><span className="fv">€{ltv.toFixed(0)}</span></div>
+          <div className="fieldrow"><span className="fk">Net revenue</span><span className="fv">€{ltv.toFixed(0)}</span></div>
+          <div className="fieldrow"><span className="fk">Gross (subtotal)</span><span className="fv">€{gross.toFixed(0)}</span></div>
+          <div className="fieldrow"><span className="fk">Discounts</span><span className="fv">{discounts > 0 ? `−€${discounts.toFixed(0)}` : "€0"}</span></div>
+          <div className="fieldrow"><span className="fk">Avg order</span><span className="fv">€{avg.toFixed(0)}</span></div>
+          <div className="fieldrow"><span className="fk">First order</span><span className="fv">{firstOrder ? new Date(firstOrder.created_at).toLocaleDateString() : "—"}</span></div>
+          <div className="fieldrow"><span className="fk">Days since last</span><span className="fv">{daysSinceLast === null ? "—" : `${daysSinceLast}d`}</span></div>
           <div className="fieldrow"><span className="fk">Consultations</span><span className="fv">{quizzes?.length ?? 0}</span></div>
           <div className="fieldrow"><span className="fk">Marketing consent</span><span className="fv">{consent ? (consent.opted_in ? "Opted in" : "Opted out") : "Not captured"}</span></div>
           <div className="fieldrow"><span className="fk">Open care items</span><span className="fv">{(careItems ?? []).filter((c) => c.status !== "resolved").length}</span></div>

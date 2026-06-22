@@ -8,7 +8,7 @@ export default async function FulfillmentPage({ searchParams }: { searchParams: 
   const db = createAdminClient();
   const { data: ordersRaw } = await db
     .from("customer_orders")
-    .select("id, user_id, items, subscription_plan, subtotal, total, status, printed_at, fulfilled_at, created_at, shipping_name, shipping_city, shipping_country")
+    .select("id, user_id, items, subscription_plan, subtotal, discount, total, status, printed_at, fulfilled_at, created_at, shipping_name, shipping_address, shipping_postal_code, shipping_city, shipping_country, shipping_email")
     .order("created_at", { ascending: false });
   const orders = (ordersRaw ?? []) as FulfillmentOrder[];
 
