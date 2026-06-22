@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { updateCare } from "./actions";
+import { updateCare, addCareReply } from "./actions";
 
 const STATUS_CHIP: Record<string, string> = { new: "info", in_progress: "warn", resolved: "ok" };
 const STATUS_LABEL: Record<string, string> = { new: "New", in_progress: "In progress", resolved: "Resolved" };
+const PRIORITY_CHIP: Record<string, string> = { low: "neutral", normal: "info", high: "warn", urgent: "danger" };
 
 function ago(iso: string) {
   const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3.6e6);
@@ -21,21 +22,38 @@ export type CareItem = {
   assignee: string | null;
   resolution: string | null;
   linked_order_id: string | null;
+  priority: string | null;
+  due_at: string | null;
   created_at: string;
 };
 
+export type CareReply = {
+  id: string;
+  care_id: string;
+  body: string;
+  author: string | null;
+  created_at: string;
+};
+
+const inputStyle: React.CSSProperties = {
+  height: 29, padding: "0 10px", fontSize: "var(--fs-xs)", border: "1px solid var(--border-2)",
+  borderRadius: "var(--btn-r)", background: "var(--surface)", color: "var(--text-strong)", outline: "none",
+};
+
 /**
- * Master-detail care queue. Selection is client state — clicking anywhere on a
- * row shows that item instantly, no navigation or refetch. Triage actions stay
- * server actions and keep the selection across revalidation (keyed by id).
+ * Master-detail care queue. Selection is client state — clicking a row shows
+ * that item instantly. Triage actions and replies are server actions and keep
+ * the selection across revalidation (keyed by id).
  */
 export default function CareClient({
   items,
   emailById,
+  repliesByCare,
   initialSelId,
 }: {
   items: CareItem[];
   emailById: Record<string, string | null>;
+  repliesByCare: Record<string, CareReply[]>;
   initialSelId?: string;
 }) {
   const [selId, setSelId] = useState<string | null>(initialSelId ?? items[0]?.id ?? null);
@@ -43,22 +61,23 @@ export default function CareClient({
 
   const open = items.filter((i) => i.status !== "resolved").length;
   const unassigned = items.filter((i) => !i.assignee && i.status !== "resolved").length;
-  const inprog = items.filter((i) => i.status === "in_progress").length;
+  const urgent = items.filter((i) => i.priority === "urgent" && i.status !== "resolved").length;
   const resolved = items.filter((i) => i.status === "resolved").length;
+  const replies = selected ? repliesByCare[selected.id] ?? [] : [];
 
   return (
     <div className="work">
       <div className="w-top"><div className="minis">
         <div className="mini"><span className="ml"><span className="mc" style={{ background: "var(--info)" }} />Open</span><span className="mv">{open}</span></div>
         <div className="mini"><span className="ml"><span className="mc" style={{ background: "var(--warn)" }} />Unassigned</span><span className="mv">{unassigned}</span></div>
-        <div className="mini"><span className="ml"><span className="mc" style={{ background: "var(--violet)" }} />In progress</span><span className="mv">{inprog}</span></div>
+        <div className="mini"><span className="ml"><span className="mc" style={{ background: "var(--danger)" }} />Urgent</span><span className="mv">{urgent}</span></div>
         <div className="mini"><span className="ml"><span className="mc" style={{ background: "var(--ok)" }} />Resolved</span><span className="mv">{resolved}</span></div>
       </div></div>
 
       <div className="w-main"><div className="card">
         <div className="card-h"><h2>Care queue</h2><span className="sub">triage and assign</span></div>
         <div className="card-b flush"><div className="twrap"><table className="tbl">
-          <thead><tr><th>Subject</th><th>Customer</th><th>Status</th><th>Assignee</th><th>Age</th></tr></thead>
+          <thead><tr><th>Subject</th><th>Customer</th><th>Priority</th><th>Status</th><th>Assignee</th><th>Age</th></tr></thead>
           <tbody>
             {items.map((it) => (
               <tr
@@ -70,12 +89,13 @@ export default function CareClient({
               >
                 <td className="cstrong">{it.subject}</td>
                 <td className="muted">{emailById[it.customer_id] ?? "—"}</td>
+                <td><span className={`chip ${PRIORITY_CHIP[it.priority ?? "normal"] ?? "neutral"}`}>{it.priority ?? "normal"}</span></td>
                 <td><span className={`chip ${STATUS_CHIP[it.status] ?? "neutral"}`}><span className="cdot" />{STATUS_LABEL[it.status] ?? it.status}</span></td>
                 <td className="muted">{it.assignee ?? "Unassigned"}</td>
                 <td className="muted">{ago(it.created_at)}</td>
               </tr>
             ))}
-            {!items.length && <tr><td colSpan={5} className="muted">No care items. Log one from a customer&apos;s record.</td></tr>}
+            {!items.length && <tr><td colSpan={6} className="muted">No care items. Log one from a customer&apos;s record.</td></tr>}
           </tbody>
         </table></div></div>
       </div></div>
@@ -86,12 +106,42 @@ export default function CareClient({
             <div className="minihead"><h3>Care item</h3><span className="ha"><span className={`chip ${STATUS_CHIP[selected.status] ?? "neutral"}`}>{STATUS_LABEL[selected.status] ?? selected.status}</span></span></div>
             <div className="fieldrow"><span className="fk">Subject</span><span className="fv">{selected.subject}</span></div>
             <div className="fieldrow"><span className="fk">Customer</span><span className="fv clink"><Link href={`/customers/${selected.customer_id}`}>{emailById[selected.customer_id] ?? "—"}</Link></span></div>
+            <div className="fieldrow"><span className="fk">Priority</span><span className="fv"><span className={`chip ${PRIORITY_CHIP[selected.priority ?? "normal"] ?? "neutral"}`}>{selected.priority ?? "normal"}</span></span></div>
+            <div className="fieldrow"><span className="fk">Due</span><span className="fv">{selected.due_at ? new Date(selected.due_at).toLocaleDateString() : "—"}</span></div>
             <div className="fieldrow"><span className="fk">Assignee</span><span className="fv">{selected.assignee ?? "Unassigned"}</span></div>
             {selected.linked_order_id ? <div className="fieldrow"><span className="fk">Linked order</span><span className="fv clink"><Link href={`/fulfillment?sel=${selected.linked_order_id}`}>#{selected.linked_order_id.slice(0, 8)}</Link></span></div> : null}
+
             <div className="notebox">
               <div className="nrow">{selected.body || "No description."}{selected.resolution ? <div className="nm">Resolution: {selected.resolution}</div> : null}</div>
             </div>
-            <div className="panelactions">
+
+            {/* triage: priority, due, reassign */}
+            <form action={updateCare} key={`triage-${selected.id}`} style={{ display: "grid", gap: 6, marginTop: 6 }}>
+              <input type="hidden" name="id" value={selected.id} />
+              <div style={{ display: "flex", gap: 6 }}>
+                <select name="priority" defaultValue={selected.priority ?? "normal"} style={{ ...inputStyle, flex: 1 }}>
+                  <option value="low">low</option><option value="normal">normal</option><option value="high">high</option><option value="urgent">urgent</option>
+                </select>
+                <input type="date" name="due_at" defaultValue={selected.due_at ? selected.due_at.slice(0, 10) : ""} style={{ ...inputStyle, flex: 1 }} />
+              </div>
+              <input name="assignee" defaultValue={selected.assignee ?? ""} placeholder="Assignee (email)…" style={inputStyle} />
+              <button className="btn sm" type="submit">Save triage</button>
+            </form>
+
+            {/* reply thread */}
+            <div className="minihead" style={{ marginTop: 10 }}><h3>Replies</h3><span className="ha"><span className="chip neutral">{replies.length}</span></span></div>
+            <div className="feed">
+              {replies.length ? replies.map((r) => (
+                <div className="msg me" key={r.id}><div className="meta">{r.author ?? "staff"} · {ago(r.created_at)}</div><div className="bubble">{r.body}</div></div>
+              )) : <div className="sysline">No replies yet</div>}
+            </div>
+            <form action={addCareReply} key={`reply-${selected.id}`} style={{ display: "grid", gap: 6, marginTop: 6 }}>
+              <input type="hidden" name="careId" value={selected.id} />
+              <textarea name="body" required placeholder="Write a reply…" style={{ ...inputStyle, height: 56, padding: "8px 10px", resize: "vertical" }} />
+              <button className="btn sm pri" type="submit">Add reply</button>
+            </form>
+
+            <div className="panelactions" style={{ marginTop: 8 }}>
               <form action={updateCare}><input type="hidden" name="id" value={selected.id} /><button className="btn" type="submit" name="assignToMe" value="true" style={{ width: "100%" }}>Assign to me</button></form>
               {selected.status !== "resolved" && <form action={updateCare}><input type="hidden" name="id" value={selected.id} /><button className="btn pri" type="submit" name="status" value="resolved" style={{ width: "100%" }}>Mark resolved</button></form>}
               <Link className="btn" href={`/customers/${selected.customer_id}`} style={{ width: "100%", justifyContent: "center" }}>Open Customer 360</Link>

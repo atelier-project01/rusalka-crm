@@ -47,6 +47,12 @@ export async function updateCare(formData: FormData) {
   const status = formData.get("status");
   if (typeof status === "string" && status) patch.status = status;
   if (String(formData.get("assignToMe")) === "true") patch.assignee = user.email;
+  const assignee = formData.get("assignee");
+  if (typeof assignee === "string" && assignee.trim()) patch.assignee = assignee.trim();
+  const priority = formData.get("priority");
+  if (typeof priority === "string" && ["low", "normal", "high", "urgent"].includes(priority)) patch.priority = priority;
+  const dueAt = formData.get("due_at");
+  if (typeof dueAt === "string") patch.due_at = dueAt.trim() ? dueAt : null;
   const resolution = formData.get("resolution");
   if (typeof resolution === "string" && resolution.trim()) patch.resolution = resolution.trim();
 
@@ -63,4 +69,25 @@ export async function updateCare(formData: FormData) {
   });
   revalidatePath("/care");
   if (data?.customer_id) revalidatePath(`/customers/${data.customer_id}`);
+}
+
+/** Add a reply to a care item's thread. */
+export async function addCareReply(formData: FormData) {
+  const careId = String(formData.get("careId") || "");
+  const body = String(formData.get("body") || "").trim();
+  if (!careId || !body) return;
+
+  const user = await staffUser();
+  if (!user) return;
+
+  await createAdminClient().from("care_replies").insert({ care_id: careId, body, author: user.email ?? null });
+
+  await logAudit({
+    actorId: user.id,
+    actorEmail: user.email,
+    action: "add_care_reply",
+    entityType: "care_item",
+    entityId: careId,
+  });
+  revalidatePath("/care");
 }
