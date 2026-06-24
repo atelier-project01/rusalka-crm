@@ -5,7 +5,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { addNote, setConsent, updateCustomer } from "./actions";
 import { createCareItem } from "../../care/actions";
+import { roleFromUser } from "@/lib/roles";
 import RowLink from "@/app/_components/row-link";
+import DeleteCustomerButton from "./delete-button";
 import { Sparkles, Check } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -258,6 +260,12 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
               <input name="tags" defaultValue={(customer.tags ?? []).join(", ")} placeholder="vip, wholesale" style={{ height: 31, padding: "0 10px", fontSize: "var(--fs-sm)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", background: "var(--surface)", color: "var(--text-strong)", outline: "none" }} /></label>
             <div><button className="btn pri sm" type="submit">Save changes</button></div>
           </form>
+          {roleFromUser(user) === "admin" ? (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border)", maxWidth: 420 }}>
+              <div className="muted" style={{ fontSize: "var(--fs-xs)", marginBottom: 6 }}>Danger zone</div>
+              <DeleteCustomerButton customerId={id} />
+            </div>
+          ) : null}
         </div>
       </div>
 
