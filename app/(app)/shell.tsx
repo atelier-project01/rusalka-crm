@@ -8,6 +8,7 @@ import type { ModuleKey, Role } from "@/lib/roles";
 import {
   LayoutDashboard,
   UserRound,
+  Users,
   Truck,
   ScanBarcode,
   Headset,
@@ -31,6 +32,7 @@ type ModuleDef = {
 const MODULES: ModuleDef[] = [
   { key: "dashboard", href: "/dashboard", label: "Overview Dashboard", section: "Overview", icon: <LayoutDashboard size={18} /> },
   { key: "customers", href: "/customers", label: "Customer 360", section: "Customer 360", icon: <UserRound size={18} /> },
+  { key: "groups", href: "/groups", label: "Customer Groups", section: "Customer Groups", icon: <Users size={18} /> },
   { key: "fulfillment", href: "/fulfillment", label: "Fulfillment", section: "Fulfillment", icon: <Truck size={18} /> },
   { key: "barcode", href: "/barcode", label: "Barcode / GTIN", section: "Barcode / GTIN", icon: <ScanBarcode size={18} /> },
   { key: "care", href: "/care", label: "Customer Care", section: "Customer Care", icon: <Headset size={18} /> },

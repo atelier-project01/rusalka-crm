@@ -6,6 +6,7 @@
 export const MODULE_KEYS = [
   "dashboard",
   "customers",
+  "groups",
   "fulfillment",
   "barcode",
   "care",
@@ -19,8 +20,8 @@ export type Role = (typeof ROLES)[number];
 
 // Which modules each role may open. Everyone gets the dashboard.
 export const ROLE_MODULES: Record<Role, ModuleKey[]> = {
-  admin: ["dashboard", "customers", "fulfillment", "barcode", "care", "knowledge", "audit"],
-  operations: ["dashboard", "fulfillment", "customers", "knowledge"],
+  admin: ["dashboard", "customers", "groups", "fulfillment", "barcode", "care", "knowledge", "audit"],
+  operations: ["dashboard", "fulfillment", "customers", "groups", "knowledge"],
   barcode: ["dashboard", "barcode", "knowledge"],
   care: ["dashboard", "customers", "care", "knowledge"],
   viewer: ["dashboard", "customers", "knowledge"],
