@@ -19,6 +19,7 @@ import {
   Menu,
   BookOpen,
   ScrollText,
+  Settings,
 } from "lucide-react";
 
 type ModuleDef = {
@@ -38,6 +39,7 @@ const MODULES: ModuleDef[] = [
   { key: "care", href: "/care", label: "Customer Care", section: "Customer Care", icon: <Headset size={18} /> },
   { key: "knowledge", href: "/knowledge", label: "Knowledge Base", section: "Knowledge Base", icon: <BookOpen size={18} /> },
   { key: "audit", href: "/audit", label: "Audit log", section: "Audit log", icon: <ScrollText size={18} /> },
+  { key: "settings", href: "/settings", label: "Settings", section: "Settings", icon: <Settings size={18} /> },
 ];
 
 export default function Shell({

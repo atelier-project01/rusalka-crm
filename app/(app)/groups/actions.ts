@@ -81,20 +81,26 @@ export async function listMembers(rules: Rule[], limit = 200): Promise<{ members
   return { members: (data ?? []) as Member[] };
 }
 
-// Distinct values to populate the builder's dropdowns.
+// Values to populate the builder's dropdowns. Skin types / concerns / lifecycle
+// stages / tags come from the admin-curated `segment_config` (Settings page);
+// countries stay derived from the live order data (no curation needed there).
 export async function filterOptions(): Promise<{
   skinTypes: string[]; lifecycles: string[]; countries: string[]; concerns: string[]; tags: string[];
 }> {
   const db = createAdminClient();
-  const { data } = await db.from(PROFILE).select("skin_type, lifecycle_stage, last_country, concerns, tags").limit(5000);
-  const rows = (data ?? []) as Array<{ skin_type: string | null; lifecycle_stage: string | null; last_country: string | null; concerns: string[] | null; tags: string[] | null }>;
-  const uniq = (xs: (string | null | undefined)[]) => [...new Set(xs.filter((x): x is string => !!x))].sort();
+  const { data: cfg } = await db.from("segment_config").select("key, values");
+  const byKey: Record<string, string[]> = {};
+  for (const r of (cfg ?? []) as Array<{ key: string; values: unknown }>) {
+    byKey[r.key] = Array.isArray(r.values) ? (r.values as string[]) : [];
+  }
+  const { data } = await db.from(PROFILE).select("last_country").limit(5000);
+  const countries = [...new Set(((data ?? []) as Array<{ last_country: string | null }>).map((r) => r.last_country).filter((x): x is string => !!x))].sort();
   return {
-    skinTypes: uniq(rows.map((r) => r.skin_type)),
-    lifecycles: uniq(rows.map((r) => r.lifecycle_stage)),
-    countries: uniq(rows.map((r) => r.last_country)),
-    concerns: uniq(rows.flatMap((r) => r.concerns ?? [])),
-    tags: uniq(rows.flatMap((r) => r.tags ?? [])),
+    skinTypes: byKey.skin_types ?? [],
+    concerns: byKey.concerns ?? [],
+    lifecycles: byKey.lifecycle_stages ?? [],
+    tags: byKey.tags ?? [],
+    countries,
   };
 }
 
