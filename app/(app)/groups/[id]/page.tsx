@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { listMembers, type Rule } from "../actions";
 import DeleteGroupButton from "./delete-button";
@@ -41,6 +42,9 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
     <>
       <div className="pagehead">
         <div>
+          <div className="crumbs" style={{ marginBottom: 4 }}>
+            <Link className="clink" href="/groups">Customer Groups</Link><span className="sep">/</span><span className="muted">{segment.name}</span>
+          </div>
           <h1>{segment.name}</h1>
           {segment.description ? <p>{segment.description}</p> : null}
         </div>
