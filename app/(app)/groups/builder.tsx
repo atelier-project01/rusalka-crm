@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { previewCount, listMembers, createSegment, filterOptions, type Rule, type Member } from "./actions";
 import RowLink from "@/app/_components/row-link";
+import { quizOptions } from "@/lib/quiz";
 
 const PREVIEW_LIMIT = 50;
 
@@ -16,6 +17,18 @@ const FIELDS = [
   { key: "lifecycle_stage", label: "Lifecycle stage", input: "select", opt: "lifecycles" },
   { key: "country", label: "Country", input: "select", opt: "countries" },
   { key: "tag", label: "Tag", input: "select", opt: "tags" },
+  // Quiz (consultation) fields — options come fixed from the quiz definitions.
+  { key: "age", label: "Age", input: "select", options: quizOptions(1) },
+  { key: "region", label: "Region", input: "select", options: quizOptions(3) },
+  { key: "environment", label: "Environment", input: "select", options: quizOptions(4) },
+  { key: "skin_tone", label: "Skin tone", input: "select", options: quizOptions(18) },
+  { key: "skin_conditions", label: "Skin conditions", input: "select", options: quizOptions(16) },
+  { key: "ingredient_values", label: "Ingredient values", input: "select", options: quizOptions(25) },
+  { key: "avoid_ingredients", label: "Ingredients to avoid", input: "select", options: quizOptions(29) },
+  { key: "fragrance_pref", label: "Fragrance preference", input: "select", options: quizOptions(31) },
+  { key: "retinol_experience", label: "Retinol experience", input: "select", options: quizOptions(27) },
+  { key: "routine_steps", label: "Routine steps", input: "select", options: quizOptions(21) },
+  { key: "pregnancy", label: "Pregnant / breastfeeding", input: "select", options: quizOptions(10) },
   { key: "last_order_before_days", label: "Last order over … days ago", input: "number", placeholder: "90" },
   { key: "total_spent_min", label: "Total spent ≥ (€)", input: "number", placeholder: "100" },
   { key: "order_count_min", label: "Order count ≥", input: "number", placeholder: "2" },
@@ -102,8 +115,10 @@ export default function Builder() {
 
   const optionsFor = (key: string): string[] => {
     const f = FIELDS.find((x) => x.key === key);
-    if (!opts || !f || f.input !== "select") return [];
-    return opts[(f as { opt: keyof Options }).opt] ?? [];
+    if (!f || f.input !== "select") return [];
+    if ("options" in f && Array.isArray(f.options)) return f.options;          // fixed quiz options
+    if (!opts) return [];
+    return "opt" in f ? (opts[(f as { opt: keyof Options }).opt] ?? []) : [];   // config/live-data options
   };
 
   const save = async () => {

@@ -1,0 +1,28 @@
+/* Structured consultation (quiz) breakdown on the Customer 360 detail page. */
+.consult-sec { padding: 12px 16px; border-top: 1px solid var(--border); }
+.consult-sec:first-child { border-top: 0; }
+.consult-sectitle {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.consult-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 42%) 1fr;
+  gap: 12px;
+  padding: 6px 0;
+  align-items: start;
+  font-size: var(--fs-sm);
+}
+.consult-row + .consult-row { border-top: 1px dashed var(--border); }
+.consult-q { color: var(--text-muted); }
+.consult-a { color: var(--text-strong); display: flex; flex-wrap: wrap; gap: 4px; align-items: baseline; }
+.consult-a.muted { color: var(--text-muted); }
+.consult-a .muted { color: var(--text-muted); }
+.consult-grid { flex-direction: column; gap: 2px; }
+@media (max-width: 640px) {
+  .consult-row { grid-template-columns: 1fr; gap: 4px; }
+}

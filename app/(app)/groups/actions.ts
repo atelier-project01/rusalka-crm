@@ -49,6 +49,19 @@ function applyRules(query: FilterChain, rules: Rule[]): FilterChain {
       case "lifecycle_stage": { const vals = toList(v); if (vals.length) query = query.in("lifecycle_stage", vals); break; }
       case "tag": { const vals = toList(v); if (vals.length) query = query.overlaps("tags", vals); break; }
       case "country": { const vals = toList(v); if (vals.length) query = query.in("last_country", vals); break; }
+      // Quiz fields — single-answer questions map to a text column (match ANY via .in).
+      case "age": { const vals = toList(v); if (vals.length) query = query.in("age", vals); break; }
+      case "region": { const vals = toList(v); if (vals.length) query = query.in("region", vals); break; }
+      case "environment": { const vals = toList(v); if (vals.length) query = query.in("environment", vals); break; }
+      case "skin_tone": { const vals = toList(v); if (vals.length) query = query.in("skin_tone", vals); break; }
+      case "routine_steps": { const vals = toList(v); if (vals.length) query = query.in("routine_steps", vals); break; }
+      case "retinol_experience": { const vals = toList(v); if (vals.length) query = query.in("retinol_experience", vals); break; }
+      case "fragrance_pref": { const vals = toList(v); if (vals.length) query = query.in("fragrance_pref", vals); break; }
+      case "pregnancy": { const vals = toList(v); if (vals.length) query = query.in("pregnancy", vals); break; }
+      // Quiz fields — multi-answer questions map to a text[] column (match ANY via .overlaps).
+      case "skin_conditions": { const vals = toList(v); if (vals.length) query = query.overlaps("skin_conditions", vals); break; }
+      case "ingredient_values": { const vals = toList(v); if (vals.length) query = query.overlaps("ingredient_values", vals); break; }
+      case "avoid_ingredients": { const vals = toList(v); if (vals.length) query = query.overlaps("avoid_ingredients", vals); break; }
       // Single-value fields.
       case "customer_type": if (v === "subscriber" || v === "onetime") query = query.eq("is_subscriber", v === "subscriber"); break;
       case "last_order_before_days": {

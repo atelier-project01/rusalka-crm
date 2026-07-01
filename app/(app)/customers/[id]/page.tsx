@@ -9,8 +9,37 @@ import { roleFromUser } from "@/lib/roles";
 import RowLink from "@/app/_components/row-link";
 import DeleteCustomerButton from "./delete-button";
 import { Sparkles, Check } from "lucide-react";
+import { QUIZ_SCHEMA, QUIZ_SECTIONS, type QuizMeta } from "@/lib/quiz";
+import "./consultation.css";
 
 export const dynamic = "force-dynamic";
+
+// True when a stored quiz answer is absent/blank (null, "", [], {}).
+function isEmptyAnswer(v: unknown): boolean {
+  if (v == null || v === "") return true;
+  if (Array.isArray(v)) return v.length === 0;
+  if (typeof v === "object") return Object.keys(v as object).length === 0;
+  return false;
+}
+
+// Renders a single quiz answer by its question type.
+function QuizAnswer({ meta, value }: { meta: QuizMeta; value: unknown }) {
+  if (isEmptyAnswer(value)) return <span className="consult-a muted">—</span>;
+  if (meta.type === "scale" && typeof value === "number") {
+    const s = meta.scale;
+    return <span className="consult-a">{value}/{s?.max ?? 5}{s ? <span className="muted">· {s.minLabel} → {s.maxLabel}</span> : null}</span>;
+  }
+  if (meta.type === "multi-scale-grid" && value && typeof value === "object" && !Array.isArray(value)) {
+    return <span className="consult-a consult-grid">{Object.entries(value as Record<string, number>).map(([k, v]) => <span key={k}>{k}: <b>{String(v)}/5</b></span>)}</span>;
+  }
+  if (meta.type === "drag-rank" && Array.isArray(value)) {
+    return <span className="consult-a">{(value as string[]).map((x, i) => <span key={i} className="chip neutral">{i + 1}. {x}</span>)}</span>;
+  }
+  if (Array.isArray(value)) {
+    return <span className="consult-a">{(value as string[]).map((x, i) => <span key={i} className="chip neutral">{x}</span>)}</span>;
+  }
+  return <span className="consult-a">{String(value)}</span>;
+}
 
 const LIFECYCLE_CHIP: Record<string, string> = { lead: "info", customer: "ok", subscriber: "violet", churned: "neutral" };
 const CARE_STATUS_CHIP: Record<string, string> = { new: "info", in_progress: "warn", resolved: "ok" };
@@ -42,7 +71,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
   ] = await Promise.all([
     db.from("customers").select("id, email, full_name, lifecycle_stage, tags, created_at").eq("id", id).maybeSingle(),
     db.from("customer_orders").select("id, items, subscription_plan, subtotal, discount, total, status, created_at, next_shipment_at, shipping_name, shipping_address, shipping_postal_code, shipping_city, shipping_country, shipping_email, shipping_phone").eq("user_id", id).order("created_at", { ascending: false }),
-    db.from("quiz_results").select("id, skin_type, concerns, fragrance_choice, recommended_serum, recommended_cleanser, recommended_moisturizer, created_at").eq("user_id", id).order("created_at", { ascending: false }),
+    db.from("quiz_results").select("id, skin_type, concerns, fragrance_choice, recommended_serum, recommended_cleanser, recommended_moisturizer, answers, created_at").eq("user_id", id).order("created_at", { ascending: false }),
     db.from("customer_interactions").select("id, body, author, created_at").eq("customer_id", id).order("created_at", { ascending: true }),
     db.from("consents").select("opted_in, created_at").eq("customer_id", id).eq("channel", "marketing_email").order("created_at", { ascending: false }).limit(1),
     db.from("care_items").select("id, subject, status, created_at").eq("customer_id", id).order("created_at", { ascending: false }),
@@ -77,6 +106,22 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
     { done: (careItems ?? []).some((c) => c.status === "resolved") && !(careItems ?? []).some((c) => c.status !== "resolved"), text: (careItems ?? []).some((c) => c.status !== "resolved") ? "Resolve open care item" : "No open care items", tag: "Care" },
     { done: (notes ?? []).length > 0, text: (notes ?? []).length ? "Notes on file" : "Add an internal note", tag: "Notes" },
   ];
+
+  // Structured consultation breakdown (latest quiz): recommendations + every
+  // answered question grouped by the three quiz sections.
+  const q0 = quizzes?.[0];
+  const quizAnswers = (q0?.answers ?? {}) as Record<string, unknown>;
+  const recs = [
+    { k: "Serum", v: q0?.recommended_serum },
+    { k: "Cleanser", v: q0?.recommended_cleanser },
+    { k: "Moisturizer", v: q0?.recommended_moisturizer },
+    { k: "Fragrance", v: q0?.fragrance_choice },
+  ].filter((r): r is { k: string; v: string } => !!r.v);
+  const consultSections = q0
+    ? ([1, 2, 3] as const)
+        .map((sec) => ({ sec, items: QUIZ_SCHEMA.filter((m) => m.section === sec && !isEmptyAnswer(quizAnswers[String(m.id)])) }))
+        .filter((s) => s.items.length)
+    : [];
 
   return (
     <>
@@ -231,16 +276,28 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
         </table></div>) : <div className="muted" style={{ padding: "var(--pad)", fontSize: "var(--fs-sm)" }}>No orders.</div>}</div>
       </div>
 
-      {quizzes && quizzes.length ? (
+      {q0 ? (
         <div className="card" style={{ marginTop: "var(--gap)" }}>
-          <div className="card-h"><h2>Latest consultation</h2><span className="sub">{when(quizzes[0].created_at)}</span></div>
+          <div className="card-h"><h2>Consultation</h2><span className="sub">{when(q0.created_at)}{quizzes && quizzes.length > 1 ? ` · ${quizzes.length} on file` : ""}</span></div>
           <div className="card-b flush">
-            <div className="fieldrow"><span className="fk">Skin type</span><span className="fv">{quizzes[0].skin_type ?? "—"}</span></div>
-            <div className="fieldrow"><span className="fk">Concerns</span><span className="fv">{Array.isArray(quizzes[0].concerns) ? quizzes[0].concerns.join(", ") : (quizzes[0].concerns ?? "—")}</span></div>
-            <div className="fieldrow"><span className="fk">Fragrance</span><span className="fv">{quizzes[0].fragrance_choice ?? "—"}</span></div>
-            <div className="fieldrow"><span className="fk">Serum</span><span className="fv">{quizzes[0].recommended_serum ?? "—"}</span></div>
-            <div className="fieldrow"><span className="fk">Cleanser</span><span className="fv">{quizzes[0].recommended_cleanser ?? "—"}</span></div>
-            <div className="fieldrow"><span className="fk">Moisturizer</span><span className="fv">{quizzes[0].recommended_moisturizer ?? "—"}</span></div>
+            {recs.length ? (
+              <div className="consult-sec">
+                <div className="consult-sectitle">Recommendation</div>
+                {recs.map((r) => (
+                  <div className="consult-row" key={r.k}><span className="consult-q">{r.k}</span><span className="consult-a">{r.v}</span></div>
+                ))}
+              </div>
+            ) : null}
+            {consultSections.length ? consultSections.map(({ sec, items }) => (
+              <div className="consult-sec" key={sec}>
+                <div className="consult-sectitle">{QUIZ_SECTIONS[sec]}</div>
+                {items.map((m) => (
+                  <div className="consult-row" key={m.id}><span className="consult-q">{m.question}</span><QuizAnswer meta={m} value={quizAnswers[String(m.id)]} /></div>
+                ))}
+              </div>
+            )) : (
+              <div className="consult-sec"><span className="muted" style={{ fontSize: "var(--fs-sm)" }}>No detailed answers captured for this consultation.</span></div>
+            )}
           </div>
         </div>
       ) : null}
