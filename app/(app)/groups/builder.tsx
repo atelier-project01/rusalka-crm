@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { previewCount, createSegment, filterOptions, type Rule } from "./actions";
+import { previewCount, listMembers, createSegment, filterOptions, type Rule, type Member } from "./actions";
+import RowLink from "@/app/_components/row-link";
+
+const PREVIEW_LIMIT = 50;
 
 type Options = { skinTypes: string[]; lifecycles: string[]; countries: string[]; concerns: string[]; tags: string[] };
 
@@ -26,6 +29,7 @@ export default function Builder() {
   const [opts, setOpts] = useState<Options | null>(null);
   const [count, setCount] = useState<number | null>(null);
   const [counting, setCounting] = useState(true);
+  const [members, setMembers] = useState<Member[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -44,8 +48,10 @@ export default function Builder() {
     setCounting(true);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
-      const res = await previewCount(JSON.parse(activeKey) as Rule[]);
-      setCount(res.count);
+      const parsed = JSON.parse(activeKey) as Rule[];
+      const [countRes, listRes] = await Promise.all([previewCount(parsed), listMembers(parsed, PREVIEW_LIMIT)]);
+      setCount(countRes.count);
+      setMembers(listRes.members);
       setCounting(false);
     }, 400);
     return () => { if (timer.current) clearTimeout(timer.current); };
@@ -107,6 +113,41 @@ export default function Builder() {
           {counting ? "Counting…" : <><span>{count ?? 0}</span> <span style={{ fontWeight: 400, fontSize: "var(--fs-sm)", color: "var(--text-muted)" }}>customers match</span></>}
         </div>
         <div className="sub" style={{ marginTop: 4 }}>Updates instantly as the filters change.</div>
+      </div>
+
+      <div className="card-b flush" style={{ borderTop: "1px solid var(--border)" }}>
+        <div style={{ padding: "12px 16px", display: "flex", alignItems: "baseline", gap: 8 }}>
+          <h2 style={{ margin: 0, fontSize: "var(--fs-md)", color: "var(--text-strong)" }}>Preview</h2>
+          <span className="sub">
+            {counting ? "Loading…" : count && count > members.length ? `First ${members.length} of ${count}` : `${members.length} customer${members.length === 1 ? "" : "s"}`}
+          </span>
+        </div>
+        {counting ? (
+          <div className="card-b"><span className="muted">Loading customers…</span></div>
+        ) : members.length === 0 ? (
+          <div className="card-b"><span className="muted">No customers match these filters yet.</span></div>
+        ) : (
+          <div className="twrap">
+            <table className="tbl">
+              <thead>
+                <tr><th>Customer</th><th>Email</th><th>Skin type</th><th>Type</th><th>Orders</th><th>Spent</th><th>Last order</th></tr>
+              </thead>
+              <tbody>
+                {members.map((m) => (
+                  <RowLink key={m.user_id} href={`/customers/${m.user_id}`}>
+                    <td className="cstrong">{m.full_name || m.email || m.user_id.slice(0, 8)}</td>
+                    <td className="muted">{m.email ?? "—"}</td>
+                    <td className="muted">{m.skin_type ?? "—"}</td>
+                    <td className="muted">{m.is_subscriber ? "Subscriber" : "One-time"}</td>
+                    <td className="muted">{m.order_count}</td>
+                    <td className="muted">€{Number(m.total_spent).toFixed(0)}</td>
+                    <td className="muted">{m.last_order_at ? new Date(m.last_order_at).toLocaleDateString() : "—"}</td>
+                  </RowLink>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="card-b" style={{ borderTop: "1px solid var(--border)", display: "grid", gap: 8, maxWidth: 440 }}>
