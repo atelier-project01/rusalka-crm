@@ -5,9 +5,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/auth";
 import { roleFromUser } from "@/lib/roles";
 
-// One filter row. Combined with AND. `field` selects the column/behaviour,
-// `value` is the comparison value (string or number depending on the field).
-export type Rule = { field: string; value: string | number };
+// One filter row. Rows are combined with AND. `field` selects the
+// column/behaviour. `value` is the comparison value: multiselect fields (skin
+// type, concern, lifecycle, country, tag) hold a string[]; single-value fields
+// (customer type, the numeric thresholds) hold a scalar. Older saved groups may
+// still hold a scalar for a now-multiselect field — the query logic folds both.
+export type Rule = { field: string; value: string | number | string[] };
 
 const PROFILE = "customer_seg_profile";
 
@@ -15,31 +18,47 @@ const PROFILE = "customer_seg_profile";
 // The real builder mutates and returns itself, so applying filters via this
 // interface mutates the original query in place. Avoids `any`.
 interface FilterChain {
-  ilike(c: string, v: string): FilterChain;
   eq(c: string, v: unknown): FilterChain;
-  contains(c: string, v: unknown): FilterChain;
+  in(c: string, v: readonly unknown[]): FilterChain;
+  overlaps(c: string, v: readonly unknown[]): FilterChain;
+  or(f: string): FilterChain;
   lt(c: string, v: string): FilterChain;
   gte(c: string, v: number): FilterChain;
+}
+
+// Normalise a rule value to a clean list of strings. Multiselect fields already
+// hold an array; scalar values (single-value fields, or older saved groups) fold
+// to a one-element list so the query logic below stays uniform.
+function toList(v: Rule["value"]): string[] {
+  const arr = Array.isArray(v) ? v : v === "" || v === null || v === undefined ? [] : [v];
+  return arr.map((x) => String(x)).filter((x) => x !== "");
 }
 
 function applyRules(query: FilterChain, rules: Rule[]): FilterChain {
   for (const r of rules) {
     const v = r.value;
-    if (v === "" || v === null || v === undefined) continue;
     switch (r.field) {
-      case "skin_type": query = query.ilike("skin_type", `%${v}%`); break;
-      case "concern": query = query.contains("concerns", [v]); break;
-      case "customer_type": query = query.eq("is_subscriber", v === "subscriber"); break;
-      case "lifecycle_stage": query = query.eq("lifecycle_stage", v); break;
-      case "tag": query = query.contains("tags", [v]); break;
-      case "country": query = query.eq("last_country", v); break;
+      // Multiselect fields — several values in one row match ANY (OR); rows still AND.
+      case "skin_type": {
+        // skin_type data is inconsistent ("Oily" vs "Oily Skin") — match leniently.
+        const vals = toList(v);
+        if (vals.length) query = query.or(vals.map((x) => `skin_type.ilike.%${x}%`).join(","));
+        break;
+      }
+      case "concern": { const vals = toList(v); if (vals.length) query = query.overlaps("concerns", vals); break; }
+      case "lifecycle_stage": { const vals = toList(v); if (vals.length) query = query.in("lifecycle_stage", vals); break; }
+      case "tag": { const vals = toList(v); if (vals.length) query = query.overlaps("tags", vals); break; }
+      case "country": { const vals = toList(v); if (vals.length) query = query.in("last_country", vals); break; }
+      // Single-value fields.
+      case "customer_type": if (v === "subscriber" || v === "onetime") query = query.eq("is_subscriber", v === "subscriber"); break;
       case "last_order_before_days": {
+        if (v === "" || v === null || v === undefined) break;
         const cutoff = new Date(Date.now() - Number(v) * 86400000).toISOString();
         query = query.lt("last_order_at", cutoff);
         break;
       }
-      case "total_spent_min": query = query.gte("total_spent", Number(v)); break;
-      case "order_count_min": query = query.gte("order_count", Number(v)); break;
+      case "total_spent_min": if (v !== "" && v !== null && v !== undefined) query = query.gte("total_spent", Number(v)); break;
+      case "order_count_min": if (v !== "" && v !== null && v !== undefined) query = query.gte("order_count", Number(v)); break;
     }
   }
   return query;

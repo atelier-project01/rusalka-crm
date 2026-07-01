@@ -23,9 +23,48 @@ const FIELDS = [
 
 const fld = { height: 31, padding: "0 10px", fontSize: "var(--fs-sm)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", background: "var(--surface)", color: "var(--text-strong)", outline: "none" } as const;
 
+// Checkbox dropdown for a multiselect filter value. Several picks in one row are
+// OR'd together by the query (see applyRules); rows are still AND'd.
+function MultiSelect({ options, selected, onChange, placeholder }: { options: string[]; selected: string[]; onChange: (next: string[]) => void; placeholder: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+  const toggle = (o: string) => onChange(selected.includes(o) ? selected.filter((x) => x !== o) : [...selected, o]);
+  const label = selected.length === 0 ? placeholder : selected.length <= 2 ? selected.join(", ") : `${selected.length} selected`;
+  return (
+    <div ref={ref} style={{ position: "relative", minWidth: 210 }}>
+      <button type="button" onClick={() => setOpen((v) => !v)} style={{ ...fld, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, cursor: "pointer", textAlign: "left", color: selected.length ? "var(--text-strong)" : "var(--text-muted)" }}>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+        <span aria-hidden style={{ opacity: 0.6, flex: "0 0 auto" }}>▾</span>
+      </button>
+      {open ? (
+        <div style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, minWidth: "100%", maxHeight: 240, overflowY: "auto", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: "var(--btn-r)", boxShadow: "0 8px 24px rgba(0,0,0,.12)", padding: 4 }}>
+          {options.length === 0 ? (
+            <div style={{ padding: "8px 10px", fontSize: "var(--fs-sm)", color: "var(--text-muted)" }}>No values configured.</div>
+          ) : options.map((o) => (
+            <label key={o} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", fontSize: "var(--fs-sm)", color: "var(--text-strong)", cursor: "pointer", borderRadius: 6 }}>
+              <input type="checkbox" checked={selected.includes(o)} onChange={() => toggle(o)} />
+              <span>{o}</span>
+            </label>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// Empty value for a freshly-picked field: multiselect fields start as an empty
+// list, single-value fields as an empty string.
+const emptyValueFor = (key: string): Rule["value"] => (FIELDS.find((x) => x.key === key)?.input === "select" ? [] : "");
+
 export default function Builder() {
   const router = useRouter();
-  const [rules, setRules] = useState<Rule[]>([{ field: "skin_type", value: "" }]);
+  const [rules, setRules] = useState<Rule[]>([{ field: "skin_type", value: [] }]);
   const [opts, setOpts] = useState<Options | null>(null);
   const [count, setCount] = useState<number | null>(null);
   const [counting, setCounting] = useState(true);
@@ -38,7 +77,7 @@ export default function Builder() {
   useEffect(() => { filterOptions().then(setOpts).catch(() => {}); }, []);
 
   const activeRules = useMemo(
-    () => rules.filter((r) => r.value !== "" && r.value !== null && r.value !== undefined),
+    () => rules.filter((r) => (Array.isArray(r.value) ? r.value.length > 0 : r.value !== "" && r.value !== null && r.value !== undefined)),
     [rules],
   );
   const activeKey = JSON.stringify(activeRules);
@@ -58,8 +97,8 @@ export default function Builder() {
   }, [activeKey]);
 
   const update = (i: number, patch: Partial<Rule>) => setRules((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
-  const addRow = () => setRules((rs) => [...rs, { field: "skin_type", value: "" }]);
-  const removeRow = (i: number) => setRules((rs) => (rs.length === 1 ? [{ field: "skin_type", value: "" }] : rs.filter((_, idx) => idx !== i)));
+  const addRow = () => setRules((rs) => [...rs, { field: "skin_type", value: [] }]);
+  const removeRow = (i: number) => setRules((rs) => (rs.length === 1 ? [{ field: "skin_type", value: [] }] : rs.filter((_, idx) => idx !== i)));
 
   const optionsFor = (key: string): string[] => {
     const f = FIELDS.find((x) => x.key === key);
@@ -84,14 +123,16 @@ export default function Builder() {
           const f = FIELDS.find((x) => x.key === r.field) ?? FIELDS[0];
           return (
             <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <select style={{ ...fld, minWidth: 210 }} value={r.field} onChange={(e) => update(i, { field: e.target.value, value: "" })}>
+              <select style={{ ...fld, minWidth: 210 }} value={r.field} onChange={(e) => update(i, { field: e.target.value, value: emptyValueFor(e.target.value) })}>
                 {FIELDS.map((x) => <option key={x.key} value={x.key}>{x.label}</option>)}
               </select>
               {f.input === "select" ? (
-                <select style={{ ...fld, minWidth: 210 }} value={String(r.value)} onChange={(e) => update(i, { value: e.target.value })}>
-                  <option value="">— choose —</option>
-                  {optionsFor(r.field).map((o) => <option key={o} value={o}>{o}</option>)}
-                </select>
+                <MultiSelect
+                  options={optionsFor(r.field)}
+                  selected={Array.isArray(r.value) ? r.value : r.value === "" || r.value === null || r.value === undefined ? [] : [String(r.value)]}
+                  onChange={(next) => update(i, { value: next })}
+                  placeholder="— choose —"
+                />
               ) : f.input === "enum" ? (
                 <select style={{ ...fld, minWidth: 160 }} value={String(r.value)} onChange={(e) => update(i, { value: e.target.value })}>
                   <option value="">— choose —</option>

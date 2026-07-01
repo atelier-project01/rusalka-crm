@@ -22,6 +22,7 @@ const FIELD_LABEL: Record<string, string> = {
 
 function ruleValueLabel(r: Rule): string {
   if (r.field === "customer_type") return r.value === "subscriber" ? "Subscriber" : "One-time";
+  if (Array.isArray(r.value)) return r.value.join(", ");
   return String(r.value);
 }
 
